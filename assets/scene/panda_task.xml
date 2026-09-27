@@ -1,0 +1,46 @@
+<mujoco model="panda task scene">
+  <include file="../third_party/franka_emika_panda/panda_mocap.xml"/>
+
+  <visual>
+    <headlight diffuse="0.65 0.65 0.65" ambient="0.28 0.28 0.28" specular="0.08 0.08 0.08"/>
+    <global azimuth="135" elevation="-25" offwidth="1200" offheight="900"/>
+  </visual>
+
+  <asset>
+    <texture name="floor_grid" type="2d" builtin="checker" width="512" height="512"
+      rgb1="0.22 0.25 0.29" rgb2="0.30 0.33 0.37" mark="edge" markrgb="0.55 0.58 0.62"/>
+    <material name="floor_mat" texture="floor_grid" texuniform="true" texrepeat="4 4" reflectance="0.08"/>
+  </asset>
+
+  <worldbody>
+    <light name="key_light" pos="0.25 -0.5 1.8" dir="0.2 0.2 -1" diffuse="0.8 0.8 0.8"/>
+    <geom name="floor" type="plane" pos="0 0 -0.01" size="2 2 0.1" material="floor_mat"/>
+
+    <body name="table" pos="0.55 0 0.375">
+      <geom name="table_top" type="box" size="0.38 0.38 0.025" rgba="0.48 0.31 0.18 1"
+        friction="0.9 0.01 0.001"/>
+    </body>
+
+    <body name="cube" pos="0.42 -0.27 0.425">
+      <freejoint name="cube_free"/>
+      <geom name="cube_geom" type="box" size="0.025 0.025 0.025" mass="0.08"
+        rgba="0.86 0.34 0.16 1" friction="0.8 0.01 0.001"/>
+    </body>
+
+    <geom name="target_a" type="box" pos="0.58 -0.12 0.401" size="0.075 0.075 0.001"
+      contype="0" conaffinity="0" rgba="0.15 0.72 0.35 0.72"/>
+    <geom name="target_b" type="box" pos="0.58 0.12 0.401" size="0.075 0.075 0.001"
+      contype="0" conaffinity="0" rgba="0.18 0.50 0.92 0.72"/>
+
+    <body name="mocap_target" mocap="true" pos="0.30 0 0.50">
+      <site name="mocap_site" type="sphere" size="0.012" rgba="0.1 0.85 1 0.7"/>
+    </body>
+  </worldbody>
+
+  <keyframe>
+    <!-- Project scene keyframe includes the free cube pose after the upstream Panda joints. -->
+    <key name="home_scene"
+      qpos="0 0 0 -1.57079 0 1.57079 -0.7853 0.04 0.04 0.42 -0.27 0.425 1 0 0 0"
+      ctrl="0 0 0 -1.57079 0 1.57079 -0.7853 255"/>
+  </keyframe>
+</mujoco>

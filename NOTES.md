@@ -20,3 +20,27 @@
 - **失败 / 错误：** 本次只读查询未观察到错误；仿真及控制尚未执行，不能据此报告无仿真故障。
 - **下一步及理由：** 完成并审核 M0 基线提交；建立 `assets/third_party/README.md` 来源记录；进入 M1 时获取并检查上述 Menagerie Panda 版本的模型与许可证，记录 `home` 和末端 site 的真实定义，再建立场景并采集实际末端跟踪数据。
 - **关联文件 / Git：** `PROJECT_PLAN.md`、`M0_M1_实施规划.md`、`requirements-lock.txt`、`.gitignore`；本记录对应的 Git commit 尚不存在。
+
+## 阶段执行记录
+
+### M0：项目与环境基线
+
+- **日期与阶段：** 2026-09-27 / M0 完成
+- **环境版本 / 模型标识：** Python 3.13.9、MuJoCo 3.14.0、Menagerie 2026.9.2、NumPy 2.5.3、Pydantic 2.13.5。`pip freeze` 与 `requirements-lock.txt` 比对一致。Menagerie Panda 提交 `c96a32d28fb5da84da38c1da4d749e7a13212855`，条目 OID `3d2262eeb81ecec19abfa31dd509e35abbb33e67`，许可证标识 Apache-2.0。
+- **目标 / 操作与配置：** 固定第一版任务边界、坐标基准和 M1 末端误差判据；补齐忽略本机环境/密钥及临时运行文件的 `.gitignore`；建立第三方来源登记；逐项检查 staged files。
+- **观察到的结果 / 验收门槛及结果：** Python 与核心依赖可从仓库 `.venv` 查询；锁文件一致；NOTES 首条决策已建立；`.gitignore` 保留 `results/m1/` 验收证据，同时忽略 `.env`、`.venv/`、缓存和临时日志。首个本地提交 `9991c06a21e8c253cdd10a730be3afc9b64e42d0` 已创建；提交清单不含 `.env` 或 `.venv/`。远端跟踪引用仍显示 `origin/main [gone]`，不影响本地基线。
+- **失败现象 / 错误信息：** 无。模型加载和仿真不属于 M0 的完成证据。
+- **下一步决定与理由：** 进入 M1，从已锁定的 Menagerie 条目复制 Panda 文件与许可证；保持上游 XML 原样，以独立派生文件实施控制所需修改。
+- **关联文件或 Git commit：** `9991c06a21e8c253cdd10a730be3afc9b64e42d0`；`requirements-lock.txt`、`.gitignore`、`assets/third_party/README.md`。
+
+### M1：MuJoCo 与 Panda 跑通
+
+- **日期与阶段：** 2026-09-27 / M1 完成
+- **环境版本 / 模型标识：** Python 3.13.9、MuJoCo 3.14.0；Menagerie 2026.9.2，仓库提交 `c96a32d28fb5da84da38c1da4d749e7a13212855`，Panda OID `3d2262eeb81ecec19abfa31dd509e35abbb33e67`，Apache-2.0。仓库内保留上游 `panda.xml`、许可证和它引用的全部 67 个 mesh；逐文件与本机 Menagerie 缓存比对 SHA-256 均一致。上游 XML SHA-256 为 `96ad67da03710f17f798c9478fd9e9efdf24a3bf8359f05e456dd9fb158ea273`。
+- **目标：** 验证 G0 模型加载、G1 mocap 到真实末端 site 的短距离跟踪、G1b 空载夹爪独立开合和场景静置稳定性。
+- **操作与配置：** `assets/scene/panda_task.xml` 编译为 15 bodies、86 geoms、8 actuators、2 equalities。步长 0.002 s；机械臂 actuator 1–7 在禁用组 0，夹爪 actuator 8 在启用组 1，控制范围 0–255。上游 `home` 机械臂关节值为 `(0, 0, 0, -1.57079, 0, 1.57079, -0.7853)`，夹爪关节为 `(0.04, 0.04)`。`ee_site` 位于 `hand` 局部 `(0, 0, 0.1034) m`，home 世界位姿为 `(0.5544995, 0, 0.5211024) m`（四元数按 MuJoCo WXYZ 记）。以该实测位姿初始化 mocap，再插值移动到三个相距 2.5 cm 的安全目标并返回 home；每段 300 步运动、150 步停留。夹爪以 0/255 命令做 3 次闭合/张开循环。场景桌面顶面 `z=0.4 m`，自由方块半边长 2.5 cm，两个无碰撞标记区域中心为 `(0.58, -0.12, 0.401)` 和 `(0.58, 0.12, 0.401) m`，每个区域半尺寸为 `(0.075, 0.075, 0.001) m`。
+- **观察到的结果：** G0 通过，项目 MJCF 可编译，名称和 actuator 范围可查询，并生成 1200×900 场景截图。G1 通过；三个目标停留阶段最大位置误差分别为 `0.0001337 m`、`0.0001309 m`、`0.0001859 m`，返回 home 的最大误差为 `0.0001883 m`。结合目标区域与方块几何的名义边界余量 `0.05 m`，将 `0.02 m` 确认为 M1 跟踪 smoke 的项目工程阈值；这不代表任务放置成功率或硬件精度。G1b 通过；夹爪关/开时两指平均关节位置分别为 `0.00135 m` 与 `0.03866 m`，site 最大漂移为 `0.000189 m`。空闲结束时方块底面 `z=0.3999205 m`，桌面顶面 `z=0.4 m`，线速度 `1.54e-10 m/s`；唯一记录到的接触是方块与桌面的预期支撑接触，最小接触距离 `-0.0000795 m`，低于 5 mm 穿透判据。无 warning、NaN 或未解释求解异常。三个门槛均通过。
+- **失败现象 / 错误信息：** 首次 smoke 用 Panda 原始 `home` keyframe 重置包含自由方块的场景时，新增方块 freejoint 被置于世界原点，测试中被机械臂碰撞并离开桌面。修正为场景专用 `home_scene` keyframe，显式记录机器人与方块完整 qpos，并将方块放在跟踪路线之外；随后静置稳定。Windows 下 MuJoCo 对含中文的绝对 XML 路径解析失败，脚本改为切到仓库根目录并使用 ASCII 相对路径。初次离屏渲染请求 1200 px 宽度超过默认 640 px framebuffer，已在场景 visual 配置中将 offscreen 缓冲区设为 1200×900。
+- **验收门槛及结果：** G0 PASS；G1 PASS（20 mm 误差限）；G1b PASS。脚本记录 435 个 CSV 样本；model_info、误差轨迹和场景截图均生成。验证对象是仿真跟踪、空载夹爪及静置场景；没有验证抓取、抬升、搬运、释放或完整放置。
+- **下一步决定与理由：** 进入 M2 时在本场景基础上实现确定性 pick/place，再单独验证真实碰撞接触与放置后置条件。保留 M1 原始轨迹和模型摘要作为后续阶段基线。
+- **关联文件或 Git commit：** `assets/third_party/franka_emika_panda/`、`assets/scene/panda_task.xml`、`scripts/m1_track_mocap.py`、`results/m1/tracking.csv`、`results/m1/model_info.json`、`results/m1/screenshots/panda_task.png`；M1 改动与本记录一起提交，精确提交可由 Git 历史查询。

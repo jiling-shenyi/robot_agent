@@ -1,0 +1,4 @@
+# Keep the vendored upstream MJCF, license, and geometry byte-for-byte on Windows.
+assets/third_party/franka_emika_panda/panda.xml -text
+assets/third_party/franka_emika_panda/LICENSE -text
+assets/third_party/franka_emika_panda/assets/** -text
