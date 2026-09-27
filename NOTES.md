@@ -21,6 +21,19 @@
 - **下一步及理由：** 完成并审核 M0 基线提交；建立 `assets/third_party/README.md` 来源记录；进入 M1 时获取并检查上述 Menagerie Panda 版本的模型与许可证，记录 `home` 和末端 site 的真实定义，再建立场景并采集实际末端跟踪数据。
 - **关联文件 / Git：** `PROJECT_PLAN.md`、`M0_M1_实施规划.md`、`requirements-lock.txt`、`.gitignore`；本记录对应的 Git commit 尚不存在。
 
+### D-002：冻结 M2 确定性抓取与放置控制及验收阈值
+
+- **日期 / 阶段：** 2026-09-27 / M2
+- **状态：** 已采纳；配置已冻结，10 个正式场景及完整复跑均通过。
+- **背景：** M1 只通过末端跟踪和空载夹爪开合，没有验证真实碰撞抓取。M2 需要确认方块确实由 Panda 手指夹起、搬运、释放并稳定放入目标区。
+- **决策：** 采用固定 home 末端姿态、顶向接近和 mocap 分段插值；每物理步目标位移上限 `0.08 mm`，到点停留 150 步。抓取须由左右 finger 与 cube 的 MuJoCo 接触及抬升结果确认；不移动方块 qpos、不使用持物 weld。成功判定使用方块 8 个角点的水平投影，目标边界内缩 `10 mm`；桌面支撑高度误差上限 `3 mm`，线速度上限 `0.01 m/s`、角速度上限 `0.1 rad/s`，连续稳定 250 步（`0.5 s`），且夹爪张开并与方块分离。
+- **穿透门槛：** 一般接触全局限制为 `5 mm`。开发 sweep 在低位抓取时反复观察到 `link4:geom28 <-> table:table_top` 接触，最深 `5.986 mm`；只对该 pair 明确配置 `6.5 mm` 上限并逐 episode 记录，其余 pair 仍受 `5 mm` 限制。此例外是已知仿真场景连杆/桌面接触，不表示机器人安全间隙或硬件通过。
+- **理由：** `0.2 mm/step` 初版轨迹在长距离搬运中有较深的连杆/桌面接触，也曾在放置触桌时被过早判作运输滑落。减至 `0.08 mm/step` 后，正式场景均保持末端误差低于 `3.1 mm`；最多出现 1 个物理步的单侧接触间隙，动作段终点仍需恢复双侧接触。放置下降阶段若双侧接触结束，只有方块已经由桌面支撑、位于目标区且高度合格才继续释放判定。
+- **冻结场景：** `configs/m2_scenarios.json` 内 5 个可达初始位置各运行到 A、B 一次，共 10 条；目标 A/B 各 5 条。该清单、`configs/m2_thresholds.json`、场景 XML 与依赖版本作为复现实验配置保存。
+- **验收结果：** 正式运行 `10/10 SUCCESS`；同一冻结清单完整复跑也为 `10/10 SUCCESS`。两轮逐条状态、仿真步数和最终方块位置完全一致。最大实际末端位置误差 `0.003025 m`；最深接触 `-0.005986 m`，且只触发上述明确 pair 例外。所有成功 episode 稳定窗口均为 250 步；无 MuJoCo warning 或非有限状态。
+- **边界：** 结果只覆盖当前 MuJoCo 3.14.0、固定 Panda 派生模型、单方块、固定姿态与确定性控制；不包含 LLM、视觉、扰动、失败恢复、真实 Panda 或 Sim2Real。
+- **关联文件：** `M2_实施计划.md`、`scripts/m2_pick_place.py`、`configs/m2_scenarios.json`、`configs/m2_thresholds.json`、`results/m2/acceptance/`、`results/m2/acceptance_repeat/`。
+
 ## 阶段执行记录
 
 ### M0：项目与环境基线
@@ -44,3 +57,30 @@
 - **验收门槛及结果：** G0 PASS；G1 PASS（20 mm 误差限）；G1b PASS。脚本记录 435 个 CSV 样本；model_info、误差轨迹和场景截图均生成。验证对象是仿真跟踪、空载夹爪及静置场景；没有验证抓取、抬升、搬运、释放或完整放置。
 - **下一步决定与理由：** 进入 M2 时在本场景基础上实现确定性 pick/place，再单独验证真实碰撞接触与放置后置条件。保留 M1 原始轨迹和模型摘要作为后续阶段基线。
 - **关联文件或 Git commit：** `assets/third_party/franka_emika_panda/`、`assets/scene/panda_task.xml`、`scripts/m1_track_mocap.py`、`results/m1/tracking.csv`、`results/m1/model_info.json`、`results/m1/screenshots/panda_task.png`；M1 改动与本记录一起提交，精确提交可由 Git 历史查询。
+
+### M1 后续：Smoke 实时 Viewer
+
+- **日期与阶段：** 2026-09-27 / M1 可视化补充
+- **环境 / 配置：** MuJoCo 3.14.0；默认运行 `python scripts/m1_track_mocap.py` 时以 `mujoco.viewer.launch_passive(model, data)` 打开被动 viewer，viewer 与烟测共用同一 `MjModel`、`MjData`。相机初始视角对准 Panda、桌面和方块；viewer 每 10 个物理步同步一次，并按模型步长节流到实时速度。`--headless` 保留原先快速、无窗口的运行方式。
+- **观察与验收结果：** 默认图形模式进程完成整段 smoke，跟踪、夹爪、场景静置和穿透检查均 PASS；末端最大停留误差、夹爪读数和方块静置结果与 M1 基线一致。本次只确认运行流程与物理状态，尚未核对实际窗口画面；后续用户反馈原生 UI 绘制异常，复现与修复记录见下。任务完成后先关闭 viewer，再进行离屏截图渲染。用户提前关闭 viewer 时脚本退出并报告未完成，不写入最终结果。
+- **关联文件：** `scripts/m1_track_mocap.py`、`README.md`、`results/m1/tracking.csv`、`results/m1/model_info.json`、`results/m1/screenshots/panda_task.png`。
+
+### M1 后续：实时窗口黑块与控件错位修复
+
+- **日期与阶段：** 2026-09-27 / M1 Viewer 修复
+- **环境与复现：** Windows；OpenGL 实际使用 `ATI Technologies Inc. / AMD Radeon(TM) Graphics`，版本 `4.6.0 Compatibility Profile Context 22.20.44.37.230215`。同一模型、数据和相机，打开原生左右面板时，真实窗口出现与用户截图一致的巨大黑块及拉伸控件；隐藏两侧面板后，真实窗口正常显示 Panda、桌面、方块和两处目标区。离屏场景渲染也正常。该现象与 [MuJoCo 官方 AMD UI 问题 #639](https://github.com/google-deepmind/mujoco/issues/639) 一致。
+- **修复：** smoke 默认传入 `show_left_ui=False, show_right_ui=False`，显示纯场景；保留鼠标相机交互与同一仿真实例的实时同步。增加 `--show-ui` 供图形驱动兼容时调试，帮助信息注明 AMD Windows 原生面板的已知问题。
+- **实际窗口验证：** 对完整 smoke 运行中的末端跟踪和夹爪闭合阶段分别抓取窗口客户区，并检查画面；从 1200×900 调整到 1600×1000 窗口后仍正常显示，无黑块或错位控件。保存的 `live_tracking.png` 和 `live_gripper.png` 来自运行中的可见窗口。M1 各物理验收门槛均 PASS，无 warning；仿真 8.7 s、435 个样本，位置误差等读数与基线一致。
+- **使用约定：** 本机保持默认纯场景模式；`--show-ui` 或 Tab / Shift+Tab 重新启用原生面板可能再次触发驱动问题。说明已同步到 README。
+- **关联文件：** `scripts/m1_track_mocap.py`、`README.md`、`results/m1/screenshots/live_tracking.png`、`results/m1/screenshots/live_gripper.png`。
+
+### M2：确定性 Pick/Place
+
+- **日期与阶段：** 2026-09-27 / M2 完成
+- **环境与模型：** Python 3.13.9、MuJoCo 3.14.0、NumPy 2.5.3；使用 M1 的 `assets/scene/panda_task.xml` 与 `home_scene`，没有修改 Panda XML 或场景物理参数。
+- **目标与操作：** 实现 `scripts/m2_pick_place.py`，支持单次目标 A/B 和冻结清单批量运行。每 episode 重置机器人与方块完整状态，先预接近、下降、闭爪、验证双侧接触、抬升，再搬运、下降、释放、撤离并独立检查后置条件。方块始终为 freejoint，仅受真实 MuJoCo 接触和重力影响。
+- **实际观察与阈值：** 夹爪闭合后左右 finger 与方块均有接触；抬升阶段实测方块跟随末端。冻结目标余量 `10 mm`、桌面高度容差 `3 mm`、线/角速度阈值 `0.01 m/s` / `0.1 rad/s`、稳定时间 `0.5 s`、一般穿透限制 `5 mm`，以及单 pair 接触例外 `6.5 mm`。十条正式轨迹均无 warning、NaN 或预算耗尽；每条至少连续满足 250 个稳定步。
+- **验收门槛及结果：** 10 个固定 `scenario_id + seed + target`（A/B 各 5 条）全部成功；第二次完整复跑同样 `10/10`，状态、步数与最终方块位置逐条完全一致。最大末端误差 `3.0243 mm`；全局最深接触为 Panda `link4` 与桌面 `5.9861 mm`，使用 D-002 记录的冻结例外。
+- **开发失败与修复：** 快速轨迹初版暴露出长距离搬运的接触深度和放置触桌时过早判滑落；收慢至 `0.08 mm/step`，加入 50 步单侧接触滞回，并将低位放置判定为“接触丢失后必须已获桌面支撑且落在目标内”后，10 个开发场景全部通过。早期失败轨迹保存在 `results/m2/dev_sweep_10/`；最终阈值标定 sweep 保存在 `results/m2/dev_sweep_6mm_a/` 和 `results/m2/dev_sweep_6mm_b/`。
+- **证据文件：** `results/m2/acceptance/episodes.jsonl`、`trajectory.csv`、`summary.json`；同配置复跑记录在 `results/m2/acceptance_repeat/`。每 25 个物理步（50 ms）写一条轨迹样本，逐物理步执行状态、接触、警告、穿透和末端误差检查。
+- **能力边界与下一步：** M2 证明固定场景内的确定性单方块模拟搬运，不证明视觉、Agent、自动恢复、真实机器人或 Sim2Real。可进入 M3，但应在模型/碰撞验证中继续关注 `link4` 与桌面的已知 5.986 mm 接触。

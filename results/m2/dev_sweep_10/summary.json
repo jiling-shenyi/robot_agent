@@ -1,0 +1,507 @@
+{
+  "count": 10,
+  "success_count": 2,
+  "all_pass": false,
+  "episodes": [
+    {
+      "scenario_id": "m2_pose_00_a",
+      "status": "SUCCESS",
+      "error_code": null,
+      "min_contact": -0.004968622836712993,
+      "max_ee": 0.0030210244822606656,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800826630401811,
+          -0.12018441233535694,
+          0.42492049380696495
+        ],
+        "cube_bottom_z_m": 0.39992049379889083,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950620110919182e-05,
+        "cube_linear_speed_m_s": 1.6059644968224692e-10,
+        "cube_angular_speed_rad_s": 1.8451480409102913e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550711074254803,
+          -0.14519596795268186
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050942186548819,
+          -0.09517285671803201
+        ],
+        "finger_qpos_m": [
+          0.039999978928232954,
+          0.04000000024018388
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "scenario_id": "m2_pose_00_b",
+      "status": "SUCCESS",
+      "error_code": null,
+      "min_contact": -0.004968622836712993,
+      "max_ee": 0.0019377164615809025,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800694275715819,
+          0.11993032860939026,
+          0.4249204938069649
+        ],
+        "cube_bottom_z_m": 0.3999204938007026,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950619929741887e-05,
+        "cube_linear_speed_m_s": 1.8424338318189389e-10,
+        "cube_angular_speed_rad_s": 5.901997772093905e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          0.05499999999999999
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          0.185
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550682877950164,
+          0.0949291888384238
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050705673481473,
+          0.14493146838035673
+        ],
+        "finger_qpos_m": [
+          0.03999998249884998,
+          0.04000000025757683
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "scenario_id": "m2_pose_01_a",
+      "status": "FAILED",
+      "error_code": "SIMULATION_ERROR",
+      "min_contact": -0.005449208809236324,
+      "max_ee": 0.0016156484882061245,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": false,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.41000000071590115,
+          -0.270000001711236,
+          0.42492049380696595
+        ],
+        "cube_bottom_z_m": 0.399920493799002,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950620099800298e-05,
+        "cube_linear_speed_m_s": 1.6139829408520045e-10,
+        "cube_angular_speed_rad_s": 3.250273149112964e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.3850000007135521,
+          -0.2950000017168509
+        ],
+        "projected_cube_xy_max_m": [
+          0.4350000007182502,
+          -0.24500000170562108
+        ],
+        "finger_qpos_m": [
+          0.0400008258767287,
+          0.03999918857465169
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": false
+      }
+    },
+    {
+      "scenario_id": "m2_pose_01_b",
+      "status": "FAILED",
+      "error_code": "SIMULATION_ERROR",
+      "min_contact": -0.005449208809236324,
+      "max_ee": 0.0016156484882061245,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": false,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.41000000071590115,
+          -0.270000001711236,
+          0.42492049380696595
+        ],
+        "cube_bottom_z_m": 0.399920493799002,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950620099800298e-05,
+        "cube_linear_speed_m_s": 1.6139829408520045e-10,
+        "cube_angular_speed_rad_s": 3.250273149112964e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          0.05499999999999999
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          0.185
+        ],
+        "projected_cube_xy_min_m": [
+          0.3850000007135521,
+          -0.2950000017168509
+        ],
+        "projected_cube_xy_max_m": [
+          0.4350000007182502,
+          -0.24500000170562108
+        ],
+        "finger_qpos_m": [
+          0.0400008258767287,
+          0.03999918857465169
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": false
+      }
+    },
+    {
+      "scenario_id": "m2_pose_02_a",
+      "status": "FAILED",
+      "error_code": "SIMULATION_ERROR",
+      "min_contact": -0.005357173931514709,
+      "max_ee": 0.001620410320464778,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": false,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.4199999997355314,
+          -0.25000000182653803,
+          0.4249204938069658
+        ],
+        "cube_bottom_z_m": 0.3999204937998057,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950620019431254e-05,
+        "cube_linear_speed_m_s": 1.8106823079972085e-10,
+        "cube_angular_speed_rad_s": 2.507304938611846e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.3949999997346258,
+          -0.2750000018327925
+        ],
+        "projected_cube_xy_max_m": [
+          0.44499999973643706,
+          -0.22500000182028354
+        ],
+        "finger_qpos_m": [
+          0.04000080129753799,
+          0.03999921376933939
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": false
+      }
+    },
+    {
+      "scenario_id": "m2_pose_02_b",
+      "status": "FAILED",
+      "error_code": "SIMULATION_ERROR",
+      "min_contact": -0.005357173931514709,
+      "max_ee": 0.001620410320464778,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": false,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.4199999997355314,
+          -0.25000000182653803,
+          0.4249204938069658
+        ],
+        "cube_bottom_z_m": 0.3999204937998057,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950620019431254e-05,
+        "cube_linear_speed_m_s": 1.8106823079972085e-10,
+        "cube_angular_speed_rad_s": 2.507304938611846e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          0.05499999999999999
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          0.185
+        ],
+        "projected_cube_xy_min_m": [
+          0.3949999997346258,
+          -0.2750000018327925
+        ],
+        "projected_cube_xy_max_m": [
+          0.44499999973643706,
+          -0.22500000182028354
+        ],
+        "finger_qpos_m": [
+          0.04000080129753799,
+          0.03999921376933939
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": false
+      }
+    },
+    {
+      "scenario_id": "m2_pose_03_a",
+      "status": "FAILED",
+      "error_code": "OBJECT_SLIPPED",
+      "min_contact": -0.0016289097058946704,
+      "max_ee": 0.0017184774926817868,
+      "postconditions": {
+        "gripper_open": false,
+        "no_gripper_contact": false,
+        "table_supported": false,
+        "bottom_height_within_tolerance": false,
+        "full_projected_footprint_inside_target_with_margin": false,
+        "linear_speed_below_limit": false,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.42987938940110265,
+          -0.28427104461124014,
+          0.4711301784237052
+        ],
+        "cube_bottom_z_m": 0.4459156723405062,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 0.0459156723405062,
+        "cube_linear_speed_m_s": 0.04802443588393645,
+        "cube_angular_speed_rad_s": 0.015284227468922027,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.40475493680518915,
+          -0.3093957991753501
+        ],
+        "projected_cube_xy_max_m": [
+          0.45500384199701616,
+          -0.2591462900471302
+        ],
+        "finger_qpos_m": [
+          0.02488987839817789,
+          0.024891115647264088
+        ],
+        "gripper_contact": true,
+        "all_instantaneous_conditions": false
+      }
+    },
+    {
+      "scenario_id": "m2_pose_03_b",
+      "status": "FAILED",
+      "error_code": "OBJECT_SLIPPED",
+      "min_contact": -0.0016289097058946704,
+      "max_ee": 0.0017184774926817868,
+      "postconditions": {
+        "gripper_open": false,
+        "no_gripper_contact": false,
+        "table_supported": false,
+        "bottom_height_within_tolerance": false,
+        "full_projected_footprint_inside_target_with_margin": false,
+        "linear_speed_below_limit": false,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.42987938940110265,
+          -0.28427104461124014,
+          0.4711301784237052
+        ],
+        "cube_bottom_z_m": 0.4459156723405062,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 0.0459156723405062,
+        "cube_linear_speed_m_s": 0.04802443588393645,
+        "cube_angular_speed_rad_s": 0.015284227468922027,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          0.05499999999999999
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          0.185
+        ],
+        "projected_cube_xy_min_m": [
+          0.40475493680518915,
+          -0.3093957991753501
+        ],
+        "projected_cube_xy_max_m": [
+          0.45500384199701616,
+          -0.2591462900471302
+        ],
+        "finger_qpos_m": [
+          0.02488987839817789,
+          0.024891115647264088
+        ],
+        "gripper_contact": true,
+        "all_instantaneous_conditions": false
+      }
+    },
+    {
+      "scenario_id": "m2_pose_04_a",
+      "status": "FAILED",
+      "error_code": "OBJECT_SLIPPED",
+      "min_contact": -0.0016273993545422934,
+      "max_ee": 0.0017192779656401815,
+      "postconditions": {
+        "gripper_open": false,
+        "no_gripper_contact": false,
+        "table_supported": false,
+        "bottom_height_within_tolerance": false,
+        "full_projected_footprint_inside_target_with_margin": false,
+        "linear_speed_below_limit": false,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.4398904385395973,
+          -0.26444600235122506,
+          0.4895693049443748
+        ],
+        "cube_bottom_z_m": 0.46437802438540937,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 0.06437802438540935,
+        "cube_linear_speed_m_s": 0.04619225927953526,
+        "cube_angular_speed_rad_s": 0.016659118092363725,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.4147711713692538,
+          -0.28954918060467094
+        ],
+        "projected_cube_xy_max_m": [
+          0.4650097057099408,
+          -0.23934282409777918
+        ],
+        "finger_qpos_m": [
+          0.024894744817343634,
+          0.024895982713298438
+        ],
+        "gripper_contact": true,
+        "all_instantaneous_conditions": false
+      }
+    },
+    {
+      "scenario_id": "m2_pose_04_b",
+      "status": "FAILED",
+      "error_code": "OBJECT_SLIPPED",
+      "min_contact": -0.0016273993545422934,
+      "max_ee": 0.0017192779656401815,
+      "postconditions": {
+        "gripper_open": false,
+        "no_gripper_contact": false,
+        "table_supported": false,
+        "bottom_height_within_tolerance": false,
+        "full_projected_footprint_inside_target_with_margin": false,
+        "linear_speed_below_limit": false,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.4398904385395973,
+          -0.26444600235122506,
+          0.4895693049443748
+        ],
+        "cube_bottom_z_m": 0.46437802438540937,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 0.06437802438540935,
+        "cube_linear_speed_m_s": 0.04619225927953526,
+        "cube_angular_speed_rad_s": 0.016659118092363725,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          0.05499999999999999
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          0.185
+        ],
+        "projected_cube_xy_min_m": [
+          0.4147711713692538,
+          -0.28954918060467094
+        ],
+        "projected_cube_xy_max_m": [
+          0.4650097057099408,
+          -0.23934282409777918
+        ],
+        "finger_qpos_m": [
+          0.024894744817343634,
+          0.024895982713298438
+        ],
+        "gripper_contact": true,
+        "all_instantaneous_conditions": false
+      }
+    }
+  ]
+}

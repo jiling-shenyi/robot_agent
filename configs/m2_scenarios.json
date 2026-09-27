@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "status": "frozen",
+  "description": "Frozen after the M2 development sweep: five measured start poses, each evaluated once for target A and once for target B. Start poses are clear of both target regions.",
+  "scenarios": [
+    {"scenario_id": "m2_pose_00_a", "seed": 0, "target": "a", "cube_position_m": [0.400, -0.290, 0.425]},
+    {"scenario_id": "m2_pose_00_b", "seed": 0, "target": "b", "cube_position_m": [0.400, -0.290, 0.425]},
+    {"scenario_id": "m2_pose_01_a", "seed": 1, "target": "a", "cube_position_m": [0.410, -0.270, 0.425]},
+    {"scenario_id": "m2_pose_01_b", "seed": 1, "target": "b", "cube_position_m": [0.410, -0.270, 0.425]},
+    {"scenario_id": "m2_pose_02_a", "seed": 2, "target": "a", "cube_position_m": [0.420, -0.250, 0.425]},
+    {"scenario_id": "m2_pose_02_b", "seed": 2, "target": "b", "cube_position_m": [0.420, -0.250, 0.425]},
+    {"scenario_id": "m2_pose_03_a", "seed": 3, "target": "a", "cube_position_m": [0.430, -0.285, 0.425]},
+    {"scenario_id": "m2_pose_03_b", "seed": 3, "target": "b", "cube_position_m": [0.430, -0.285, 0.425]},
+    {"scenario_id": "m2_pose_04_a", "seed": 4, "target": "a", "cube_position_m": [0.440, -0.265, 0.425]},
+    {"scenario_id": "m2_pose_04_b", "seed": 4, "target": "b", "cube_position_m": [0.440, -0.265, 0.425]}
+  ]
+}
