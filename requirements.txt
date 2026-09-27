@@ -1,0 +1,6 @@
+mujoco==3.14.0
+mujoco-menagerie==2026.9.2
+numpy==2.5.3
+openai==3.19.2
+pydantic==2.13.5
+python-dotenv==1.2.3

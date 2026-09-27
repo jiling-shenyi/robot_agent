@@ -1,0 +1,16 @@
+# Local environment and credentials
+.venv/
+.env
+.env.*
+!.env.example
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Local temporary outputs. M1 evidence under results/m1 is versioned.
+results/cache/
+results/tmp/
+*.log
