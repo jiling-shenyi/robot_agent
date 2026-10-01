@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "frozen",
-  "description": "Frozen after the 10-scene development sweep. A recorded Panda link4/table contact has a separate 6.5 mm diagnostic ceiling; every other pair keeps the 5 mm limit.",
+  "description": "Frozen for 10-scene pick/place and danger-zone validation. A recorded Panda link4/table contact has a separate 6.5 mm diagnostic ceiling; every other pair keeps the 5 mm limit.",
   "motion_max_step_m": 0.00008,
   "terminal_dwell_steps": 150,
   "gripper_close_steps": 350,
@@ -17,6 +17,7 @@
   "place_clearance_m": 0.006,
   "grasp_relative_drift_limit_m": 0.015,
   "target_margin_m": 0.01,
+  "danger_zone_clearance_m": 0.02,
   "linear_speed_limit_m_s": 0.01,
   "angular_speed_limit_rad_s": 0.1,
   "table_support_tolerance_m": 0.003,
@@ -25,6 +26,6 @@
   "finger_closed_contact_qpos_min_m": 0.01,
   "gripper_unilateral_contact_grace_steps": 50,
   "contact_penetration_exceptions_m": {
-    "link4:geom28 <-> table:table_top": 0.0065
+    "link4 <-> table": 0.0065
   }
 }

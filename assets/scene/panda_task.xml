@@ -31,6 +31,9 @@
       contype="0" conaffinity="0" rgba="0.15 0.72 0.35 0.72"/>
     <geom name="target_b" type="box" pos="0.58 0.12 0.401" size="0.075 0.075 0.001"
       contype="0" conaffinity="0" rgba="0.18 0.50 0.92 0.72"/>
+    <!-- Visual-only restricted volume; M2 enforces a clearance around this named geom. -->
+    <geom name="danger_zone" type="box" pos="0.82 0.28 0.535" size="0.06 0.06 0.135"
+      contype="0" conaffinity="0" rgba="0.95 0.08 0.05 0.34"/>
 
     <body name="mocap_target" mocap="true" pos="0.30 0 0.50">
       <site name="mocap_site" type="sphere" size="0.012" rgba="0.1 0.85 1 0.7"/>

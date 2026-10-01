@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "status": "frozen",
+  "description": "M3 constrained single-cube pick/place planning, runtime budgets, and path precheck.",
+  "budgets": {
+    "planner_requests_per_episode": 1,
+    "planner_timeout_s": 30,
+    "max_output_tokens": 256,
+    "max_episode_steps": 30000,
+    "max_skill_calls": 2,
+    "pick_skill_steps": 10000,
+    "place_skill_steps": 12000,
+    "skill_retries": 0,
+    "replans": 0
+  },
+  "language": {
+    "resolver_version": "m3-target-aliases-v1",
+    "max_instruction_chars": 240,
+    "supported_action_phrases": ["放", "放置", "放到", "放入", "移到", "put", "place", "move", "transfer"],
+    "unsupported_phrases": ["push", "throw", "stack", "推", "扔", "堆叠", "多个方块"],
+    "target_aliases": {
+      "target_a": ["target[_\\s-]*a\\b", "(?:area|zone)\\s+a\\b", "a\\s*区", "区\\s*a(?:\\s|$|[，。,.!?])", "绿色", "绿区", "green(?:\\s+target)?"],
+      "target_b": ["target[_\\s-]*b\\b", "(?:area|zone)\\s+b\\b", "b\\s*区", "区\\s*b(?:\\s|$|[，。,.!?])", "蓝色", "蓝区", "blue(?:\\s+target)?"]
+    }
+  },
+  "planner": {
+    "kind": "llm",
+    "schema_version": 1,
+    "max_plan_chars": 2048,
+    "system_prompt_version": "m3-pick-place-json-v2",
+    "reasoning_effort": "low",
+    "thinking": "disabled",
+    "system_prompt": "You are a constrained robot task planner. Return exactly one JSON object with exactly these top-level keys: schema_version, base_obs_id, steps. Do not include a type, format, metadata, or any other key. Match this example shape exactly: {\"schema_version\":1,\"base_obs_id\":1,\"steps\":[{\"skill\":\"pick\",\"object_id\":\"cube\",\"approach_mode\":\"top\"},{\"skill\":\"place\",\"target_id\":\"target_a\"}]}. Use the required_plan target and base_obs_id from the user message. Use only the listed skills and IDs. Include no markdown or explanatory text. Do not claim that an action has already succeeded."
+  },
+  "path_precheck": {
+    "danger_zone_clearance_m": 0.02,
+    "ee_payload_envelope_radius_m": 0.05,
+    "sample_spacing_m": 0.01
+  }
+}

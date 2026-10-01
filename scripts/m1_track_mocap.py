@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import atexit
 import csv
 import datetime as dt
 import hashlib
@@ -10,11 +11,13 @@ import json
 import math
 import os
 import struct
+import time
 import zlib
 from pathlib import Path
 from typing import Any
 
 import mujoco
+import mujoco.viewer
 import mujoco_menagerie as menagerie
 import numpy as np
 
@@ -28,6 +31,13 @@ PENETRATION_LIMIT_M = 0.005
 SAMPLE_EVERY_STEPS = 10
 DWELL_STEPS = 150
 MOTION_STEPS = 300
+DANGER_ZONE_CENTER_M = np.array([0.82, 0.28, 0.535], dtype=np.float64)
+DANGER_ZONE_HALF_SIZE_M = np.array([0.06, 0.06, 0.135], dtype=np.float64)
+DANGER_ZONE_RGBA = np.array([0.95, 0.08, 0.05, 0.34], dtype=np.float64)
+
+
+class ViewerClosed(RuntimeError):
+    """Raised when the user closes the live viewer before the smoke finishes."""
 
 
 def _name_id(model: mujoco.MjModel, obj: mujoco.mjtObj, name: str) -> int:
@@ -112,6 +122,16 @@ def main() -> int:
         default=ROOT / "results" / "m1",
         help="directory for CSV, JSON summary, and screenshot (default: results/m1)",
     )
+    parser.add_argument(
+        "--headless",
+        action="store_true",
+        help="run as fast as possible without opening the live MuJoCo viewer",
+    )
+    parser.add_argument(
+        "--show-ui",
+        action="store_true",
+        help="show native debug panels (hidden by default; affected AMD Windows drivers corrupt these panels)",
+    )
     args = parser.parse_args()
     output = args.output if args.output.is_absolute() else ROOT / args.output
     screenshots = output / "screenshots"
@@ -130,6 +150,7 @@ def main() -> int:
     mocap_body_id = _name_id(model, mujoco.mjtObj.mjOBJ_BODY, "mocap_target")
     cube_body_id = _name_id(model, mujoco.mjtObj.mjOBJ_BODY, "cube")
     table_geom_id = _name_id(model, mujoco.mjtObj.mjOBJ_GEOM, "table_top")
+    danger_zone_geom_id = _name_id(model, mujoco.mjtObj.mjOBJ_GEOM, "danger_zone")
     target_geom_ids = [
         _name_id(model, mujoco.mjtObj.mjOBJ_GEOM, "target_a"),
         _name_id(model, mujoco.mjtObj.mjOBJ_GEOM, "target_b"),
@@ -174,6 +195,34 @@ def main() -> int:
     home_arm_qpos = data.qpos[arm_qpos_addresses].copy()
     table_top_z = float(data.geom_xpos[table_geom_id][2] + model.geom_size[table_geom_id][2])
     cube_half_height = float(model.geom_size[_name_id(model, mujoco.mjtObj.mjOBJ_GEOM, "cube_geom")][2])
+    danger_zone_center = model.geom_pos[danger_zone_geom_id].copy()
+    danger_zone_half_size = model.geom_size[danger_zone_geom_id].copy()
+    danger_zone_rgba = model.geom_rgba[danger_zone_geom_id].copy()
+    table_half_size = model.geom_size[table_geom_id]
+    if int(model.geom_bodyid[danger_zone_geom_id]) != 0:
+        raise RuntimeError("danger_zone must be fixed to the world frame")
+    if int(model.geom_type[danger_zone_geom_id]) != int(mujoco.mjtGeom.mjGEOM_BOX):
+        raise RuntimeError("danger_zone must be a box so its visible and checked volumes agree")
+    if not np.allclose(danger_zone_center, DANGER_ZONE_CENTER_M, atol=1e-9, rtol=0.0):
+        raise RuntimeError(f"Unexpected danger_zone center: {danger_zone_center.tolist()}")
+    if not np.allclose(danger_zone_half_size, DANGER_ZONE_HALF_SIZE_M, atol=1e-9, rtol=0.0):
+        raise RuntimeError(f"Unexpected danger_zone half-size: {danger_zone_half_size.tolist()}")
+    if not np.allclose(danger_zone_rgba, DANGER_ZONE_RGBA, atol=1e-6, rtol=0.0):
+        raise RuntimeError(f"Unexpected danger_zone visual color/alpha: {danger_zone_rgba.tolist()}")
+    if int(model.geom_contype[danger_zone_geom_id]) != 0 or int(
+        model.geom_conaffinity[danger_zone_geom_id]
+    ) != 0:
+        raise RuntimeError("danger_zone must remain visual-only; M2 enforces it in software")
+    danger_zone_bottom_z = float(danger_zone_center[2] - danger_zone_half_size[2])
+    table_lower_xy = data.geom_xpos[table_geom_id][:2] - table_half_size[:2]
+    table_upper_xy = data.geom_xpos[table_geom_id][:2] + table_half_size[:2]
+    if abs(danger_zone_bottom_z - table_top_z) > 1e-9:
+        raise RuntimeError("danger_zone must start at the tabletop surface")
+    if np.any(danger_zone_center[:2] - danger_zone_half_size[:2] < table_lower_xy) or np.any(
+        danger_zone_center[:2] + danger_zone_half_size[:2] > table_upper_xy
+    ):
+        raise RuntimeError("danger_zone must fit inside the tabletop footprint")
+    danger_zone_config_pass = True
 
     samples: list[dict[str, Any]] = []
     pair_min_distance: dict[str, float] = {}
@@ -182,6 +231,36 @@ def main() -> int:
     gripper_site_positions: list[np.ndarray] = []
     bad_state_seen = False
     step_count = 0
+    viewer = None
+    next_viewer_deadline = time.perf_counter()
+
+    def close_viewer() -> None:
+        nonlocal viewer
+        if viewer is not None:
+            handle, viewer = viewer, None
+            try:
+                handle.close()
+            except Exception:
+                pass
+
+    atexit.register(close_viewer)
+
+    if not args.headless:
+        # Native mjUI panels can corrupt the entire window on AMD Windows
+        # OpenGL drivers (MuJoCo issue #639). Render the scene alone by default;
+        # camera interaction remains available without the debugging panels.
+        viewer = mujoco.viewer.launch_passive(
+            model, data, show_left_ui=args.show_ui, show_right_ui=args.show_ui
+        )
+        with viewer.lock():
+            viewer.cam.type = mujoco.mjtCamera.mjCAMERA_FREE
+            viewer.cam.lookat[:] = np.array([0.48, 0.0, 0.39])
+            viewer.cam.distance = 1.6
+            viewer.cam.azimuth = 135.0
+            viewer.cam.elevation = -24.0
+        viewer.sync()
+        next_viewer_deadline = time.perf_counter()
+        print("Live viewer opened; smoke simulation is paced to real time. Close the window to stop.")
 
     def sample(trial_id: str, phase: str, target: np.ndarray) -> float:
         nonlocal bad_state_seen
@@ -219,13 +298,22 @@ def main() -> int:
         return error
 
     def step_recorded(trial_id: str, phase: str, target: np.ndarray) -> float:
-        nonlocal step_count
+        nonlocal step_count, next_viewer_deadline
         mujoco.mj_step(model, data)
         step_count += 1
         if step_count % SAMPLE_EVERY_STEPS == 0:
-            return sample(trial_id, phase, target)
-        _contact_snapshot(model, data, pair_min_distance)
-        return float(np.linalg.norm(data.site_xpos[ee_site_id] - target))
+            error = sample(trial_id, phase, target)
+        else:
+            _contact_snapshot(model, data, pair_min_distance)
+            error = float(np.linalg.norm(data.site_xpos[ee_site_id] - target))
+
+        if viewer is not None and step_count % SAMPLE_EVERY_STEPS == 0:
+            if not viewer.is_running():
+                raise ViewerClosed
+            viewer.sync()
+            next_viewer_deadline += float(model.opt.timestep) * SAMPLE_EVERY_STEPS
+            time.sleep(max(0.0, next_viewer_deadline - time.perf_counter()))
+        return error
 
     def move_to(trial_id: str, goal: np.ndarray) -> list[float]:
         start = data.mocap_pos[mocap_id].copy()
@@ -277,6 +365,10 @@ def main() -> int:
     for _ in range(1000):
         step_recorded("scene_idle", "idle", home_pos)
 
+    # The interactive simulation is complete; release its GL context before the
+    # deterministic offscreen screenshot is rendered below.
+    close_viewer()
+
     cube_position = data.xpos[cube_body_id].copy()
     cube_speed = float(np.linalg.norm(data.cvel[cube_body_id][3:]))
     cube_bottom_z = float(cube_position[2] - cube_half_height)
@@ -304,6 +396,7 @@ def main() -> int:
         abs(cube_bottom_z - table_top_z) <= 0.003
         and cube_speed <= 0.01
         and target_collision_disabled
+        and danger_zone_config_pass
     )
     warnings = _warning_counts(data)
     min_contact_distance = min(pair_min_distance.values(), default=0.0)
@@ -391,6 +484,15 @@ def main() -> int:
             "cube_linear_speed_m_s": cube_speed,
             "target_markers_collision_disabled": target_collision_disabled,
             "target_regions_world_centers_m": [model.geom_pos[i].tolist() for i in target_geom_ids],
+            "danger_zone": {
+                "geom": "danger_zone",
+                "world_center_m": danger_zone_center.tolist(),
+                "half_size_m": danger_zone_half_size.tolist(),
+                "rgba": danger_zone_rgba.tolist(),
+                "visual_only": True,
+                "bottom_z_m": danger_zone_bottom_z,
+                "configuration_gate_pass": danger_zone_config_pass,
+            },
         },
         "results": {
             "csv": str(csv_path.relative_to(ROOT)).replace("\\", "/"),
@@ -425,10 +527,19 @@ def main() -> int:
     print(f"Tracking gate: {'PASS' if tracking_pass else 'FAIL'}")
     print(f"Gripper gate: {'PASS' if gripper_pass else 'FAIL'}; closed={closed_avg:.5f}, open={open_avg:.5f}, ee drift={ee_motion_during_gripper:.5f} m")
     print(f"Scene idle gate: {'PASS' if scene_pass else 'FAIL'}; cube bottom={cube_bottom_z:.5f} m, speed={cube_speed:.6f} m/s")
+    print(
+        "Danger-zone scene gate: PASS; "
+        f"center={danger_zone_center.tolist()} m, half-size={danger_zone_half_size.tolist()} m, "
+        "red translucent and visual-only"
+    )
     print(f"Warnings: {warnings or 'none'}; minimum contact distance={min_contact_distance:.6f} m")
     print(f"Evidence: {csv_path}, {info_path}, {screenshot_path}")
     return 0 if model_info["results"]["overall_pass"] else 1
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except ViewerClosed:
+        print("Live viewer closed before the smoke simulation finished; no final result was written.")
+        raise SystemExit(130)

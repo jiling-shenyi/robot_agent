@@ -3,17 +3,20 @@
 from __future__ import annotations
 
 import argparse
+import atexit
 import csv
 import datetime as dt
 import hashlib
 import json
 import math
 import os
+import time
 import traceback
 from pathlib import Path
 from typing import Any
 
 import mujoco
+import mujoco.viewer
 import numpy as np
 
 
@@ -33,6 +36,10 @@ class M2Failure(RuntimeError):
     def __init__(self, code: str, message: str):
         super().__init__(message)
         self.code = code
+
+
+class ViewerClosed(RuntimeError):
+    """Raised when the user closes the live viewer before an episode completes."""
 
 
 def name_id(model: mujoco.MjModel, kind: mujoco.mjtObj, name: str) -> int:
@@ -97,15 +104,22 @@ class Episode:
         scenario: dict[str, Any],
         thresholds: dict[str, Any],
         output_dir: Path,
+        enable_viewer: bool = False,
+        show_ui: bool = False,
     ) -> None:
         self.scenario = scenario
         self.thresholds = thresholds
         self.model = mujoco.MjModel.from_xml_path("assets/scene/panda_task.xml")
         self.data = mujoco.MjData(self.model)
         self.output_dir = output_dir
+        self.enable_viewer = enable_viewer
+        self.show_ui = show_ui
+        self.viewer = None
+        self.next_viewer_deadline = time.perf_counter()
         self.samples: list[dict[str, Any]] = []
         self.events: list[dict[str, Any]] = []
         self.total_steps = 0
+        self.step_budget_limit = int(thresholds["max_episode_steps"])
         self.max_ee_error = 0.0
         self.minimum_contact_distance = math.inf
         self.pair_min_distance: dict[str, float] = {}
@@ -114,6 +128,7 @@ class Episode:
         self.last_contacts: list[dict[str, Any]] = []
         self.stage = "initialize"
         self.result: dict[str, Any] = {}
+        self.prepared = False
 
         self.key_id = name_id(self.model, mujoco.mjtObj.mjOBJ_KEY, "home_scene")
         mujoco.mj_resetDataKeyframe(self.model, self.data, self.key_id)
@@ -129,6 +144,14 @@ class Episode:
             mujoco.mjtObj.mjOBJ_GEOM,
             "target_a" if scenario["target"] == "a" else "target_b",
         )
+        self.danger_zone_geom_id = name_id(
+            self.model, mujoco.mjtObj.mjOBJ_GEOM, "danger_zone"
+        )
+        self.danger_zone_clearance_m = float(thresholds["danger_zone_clearance_m"])
+        self.danger_zone_fromto = np.zeros(6, dtype=np.float64)
+        self.robot_collision_geom_ids: list[int] = []
+        self.minimum_danger_zone_separation = math.inf
+        self.danger_zone_violation: dict[str, Any] | None = None
         self.gripper_actuator_id = name_id(
             self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, "actuator8"
         )
@@ -169,6 +192,12 @@ class Episode:
             body_name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, body_id) or f"body{body_id}"
             geom_name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_GEOM, geom_id) or f"geom{geom_id}"
             self.geom_labels.append(f"{body_name}:{geom_name}")
+            if (
+                body_name not in {"world", "table", "cube", "mocap_target"}
+                and geom_id != self.danger_zone_geom_id
+                and (int(self.model.geom_contype[geom_id]) or int(self.model.geom_conaffinity[geom_id]))
+            ):
+                self.robot_collision_geom_ids.append(geom_id)
 
         self._validate_model()
 
@@ -185,6 +214,19 @@ class Episode:
             raise RuntimeError("cube_free must remain a free joint")
         if not np.allclose(self.model.actuator_ctrlrange[self.gripper_actuator_id], [0, 255]):
             raise RuntimeError("Unexpected gripper actuator control range")
+        if self.danger_zone_clearance_m <= 0 or not math.isfinite(self.danger_zone_clearance_m):
+            raise ValueError("danger_zone_clearance_m must be a positive finite value")
+        if int(self.model.geom_contype[self.danger_zone_geom_id]) != 0 or int(
+            self.model.geom_conaffinity[self.danger_zone_geom_id]
+        ) != 0:
+            raise RuntimeError("danger_zone must be visual-only; M2 enforces it in software")
+        if int(self.model.geom_type[self.danger_zone_geom_id]) != int(mujoco.mjtGeom.mjGEOM_BOX):
+            raise RuntimeError("danger_zone must remain a 3D box so checks match its visible volume")
+        danger_half_size = self.model.geom_size[self.danger_zone_geom_id]
+        if not np.isfinite(danger_half_size).all() or np.any(danger_half_size <= 0):
+            raise RuntimeError("danger_zone must have finite, positive half-sizes")
+        if not self.robot_collision_geom_ids:
+            raise RuntimeError("No Panda collision geoms found for danger-zone validation")
         if len(self.initial_cube_position) != 3 or not np.isfinite(
             self.initial_cube_position
         ).all():
@@ -288,6 +330,12 @@ class Episode:
             "minimum_contact_distance_so_far_m": (
                 self.minimum_contact_distance if math.isfinite(self.minimum_contact_distance) else None
             ),
+            "minimum_danger_zone_separation_so_far_m": (
+                self.minimum_danger_zone_separation
+                if math.isfinite(self.minimum_danger_zone_separation)
+                else None
+            ),
+            "danger_zone_clear": self.danger_zone_violation is None,
             "warnings": warning_counts(self.data),
             "finite_state": finite,
         }
@@ -301,11 +349,154 @@ class Episode:
     def _record_sample(self) -> None:
         self.samples.append(self._snapshot())
 
+    def _check_danger_zone(self) -> None:
+        """Enforce clearance for every Panda collision geom and the manipulated cube."""
+        for geom_id in (*self.robot_collision_geom_ids, self.cube_geom_id):
+            distance = float(
+                mujoco.mj_geomDistance(
+                    self.model,
+                    self.data,
+                    geom_id,
+                    self.danger_zone_geom_id,
+                    10.0,
+                    self.danger_zone_fromto,
+                )
+            )
+            if not math.isfinite(distance):
+                raise M2Failure(
+                    "SIMULATION_ERROR",
+                    f"Non-finite separation from danger_zone for {self.geom_labels[geom_id]}",
+                )
+            self.minimum_danger_zone_separation = min(
+                self.minimum_danger_zone_separation, distance
+            )
+            if distance < self.danger_zone_clearance_m:
+                self.danger_zone_violation = {
+                    "phase": self.stage,
+                    "step": self.total_steps,
+                    "geom": self.geom_labels[geom_id],
+                    "distance_m": distance,
+                    "required_clearance_m": self.danger_zone_clearance_m,
+                    "closest_points_m": self.danger_zone_fromto.reshape(2, 3).copy(),
+                }
+                self._record_event("danger_zone_violation", self.danger_zone_violation)
+                self.set_viewer_status(
+                    "DANGER_ZONE_VIOLATION",
+                    f"{self.geom_labels[geom_id]} entered the {self.danger_zone_clearance_m * 1000:.1f} mm safety margin",
+                )
+                raise M2Failure(
+                    "DANGER_ZONE_VIOLATION",
+                    f"{self.geom_labels[geom_id]} came within "
+                    f"{self.danger_zone_clearance_m * 1000:.1f} mm of danger_zone "
+                    f"(separation={distance * 1000:.3f} mm)",
+                )
+
+    def _open_viewer(self) -> None:
+        if not self.enable_viewer:
+            return
+        # Keep visualization attached to the exact model/data pair being stepped.
+        self.viewer = mujoco.viewer.launch_passive(
+            self.model,
+            self.data,
+            show_left_ui=self.show_ui,
+            show_right_ui=self.show_ui,
+        )
+        with self.viewer.lock():
+            self.viewer.cam.type = mujoco.mjtCamera.mjCAMERA_FREE
+            self.viewer.cam.lookat[:] = np.array([0.48, 0.0, 0.39])
+            self.viewer.cam.distance = 1.6
+            self.viewer.cam.azimuth = 135.0
+            self.viewer.cam.elevation = -24.0
+        self.viewer.sync()
+        self.next_viewer_deadline = time.perf_counter()
+        atexit.register(self._close_viewer)
+        print("Live viewer opened; episode is paced to simulation time. Close the window to stop.")
+
+    def _close_viewer(self) -> None:
+        if self.viewer is not None:
+            handle, self.viewer = self.viewer, None
+            try:
+                handle.close()
+            except Exception:
+                pass
+
+    def set_viewer_status(self, title: str, detail: str) -> None:
+        """Show a persistent status on the same live model/data pair as the episode."""
+        if self.viewer is None or not self.viewer.is_running():
+            return
+        self.viewer.set_texts((None, None, title, detail))
+        self.viewer.sync()
+
+    def wait_for_viewer_close(self) -> None:
+        """Keep a completed episode visible until the user closes its viewer."""
+        if self.viewer is None:
+            return
+        try:
+            if self.viewer.is_running():
+                print("Viewer remains open for inspection; close the MuJoCo window to finish this command.")
+                while self.viewer.is_running():
+                    self.viewer.sync()
+                    time.sleep(1.0 / 30.0)
+        except KeyboardInterrupt:
+            print("Viewer closed from the terminal.")
+        finally:
+            self._close_viewer()
+
+    def prepare(self) -> dict[str, Any]:
+        """Reset the episode and align the mocap target with the real Panda hand."""
+        if self.prepared:
+            raise RuntimeError("Episode is already prepared")
+        self.stage = "reset_and_settle"
+        mujoco.mj_resetDataKeyframe(self.model, self.data, self.key_id)
+        self.data.qpos[self.cube_qpos_adr : self.cube_qpos_adr + 7] = np.array(
+            [*self.initial_cube_position, 1.0, 0.0, 0.0, 0.0]
+        )
+        self.data.ctrl[self.gripper_actuator_id] = 255.0
+        mujoco.mj_forward(self.model, self.data)
+        self.data.mocap_pos[self.mocap_id] = self.data.site_xpos[self.ee_site_id].copy()
+        self.ee_quat = np.empty(4, dtype=np.float64)
+        mujoco.mju_mat2Quat(self.ee_quat, self.data.site_xmat[self.ee_site_id])
+        self.data.mocap_quat[self.mocap_id] = self.ee_quat
+        mujoco.mj_forward(self.model, self.data)
+        self._check_danger_zone()
+        self._open_viewer()
+        self._record_event("reset_complete", {"cube_start_xyz_m": self.initial_cube_position})
+        self.prepared = True
+        return self._snapshot()
+
+    def move_ee(
+        self,
+        stage: str,
+        target_xyz: np.ndarray,
+        held: bool = False,
+        require_transport_clearance: bool = False,
+    ) -> None:
+        """Move the actual Panda hand through M2's monitored mocap control path."""
+        if not self.prepared:
+            raise RuntimeError("Call prepare() before moving the Panda hand")
+        target = np.asarray(target_xyz, dtype=np.float64)
+        if target.shape != (3,) or not np.isfinite(target).all():
+            raise ValueError("target_xyz must contain three finite coordinates")
+        self._move_ee(stage, target, held, require_transport_clearance)
+
+    def record_failure(self, error_code: str, message: str) -> None:
+        """Record an episode-level failure after a monitored action raises."""
+        self._record_event("episode_failed", {"error_code": error_code, "message": message})
+
+    def _sync_viewer(self) -> None:
+        if self.viewer is None or self.total_steps % SAMPLE_EVERY_STEPS != 0:
+            return
+        if not self.viewer.is_running():
+            raise ViewerClosed
+        self.viewer.sync()
+        self.next_viewer_deadline += float(self.model.opt.timestep) * SAMPLE_EVERY_STEPS
+        time.sleep(max(0.0, self.next_viewer_deadline - time.perf_counter()))
+
     def _step(self) -> None:
+        if self.total_steps >= self.step_budget_limit:
+            raise M2Failure("BUDGET_EXHAUSTED", "Episode step budget exhausted")
         mujoco.mj_step(self.model, self.data)
         self.total_steps += 1
-        if self.total_steps > int(self.thresholds["max_episode_steps"]):
-            raise M2Failure("BUDGET_EXHAUSTED", "Episode step budget exhausted")
         self._update_contact_metrics()
         if not (
             np.isfinite(self.data.qpos).all()
@@ -317,21 +508,29 @@ class Episode:
         warnings = warning_counts(self.data)
         if warnings:
             raise M2Failure("SIMULATION_ERROR", f"MuJoCo warning observed: {warnings}")
+        self._check_danger_zone()
         global_penetration_limit = float(self.thresholds["penetration_limit_m"])
         pair_exceptions = self.thresholds.get("contact_penetration_exceptions_m", {})
         for contact_index in range(self.data.ncon):
             contact = self.data.contact[contact_index]
             geom1, geom2 = int(contact.geom1), int(contact.geom2)
             pair = " <-> ".join(sorted((self.geom_labels[geom1], self.geom_labels[geom2])))
+            body1, body2 = int(self.model.geom_bodyid[geom1]), int(self.model.geom_bodyid[geom2])
+            body_pair = " <-> ".join(
+                sorted((self._body_name(body1), self._body_name(body2)))
+            )
             distance = float(contact.dist)
-            allowed_penetration = float(pair_exceptions.get(pair, global_penetration_limit))
+            exception_key = pair if pair in pair_exceptions else body_pair
+            allowed_penetration = float(
+                pair_exceptions.get(exception_key, global_penetration_limit)
+            )
             if distance < -allowed_penetration:
                 raise M2Failure(
                     "SIMULATION_ERROR",
                     f"Contact penetration exceeded {allowed_penetration * 1000:.1f} mm "
                     f"for {pair}: {distance * 1000:.3f} mm",
                 )
-            if pair in pair_exceptions and distance < -global_penetration_limit:
+            if exception_key in pair_exceptions and distance < -global_penetration_limit:
                 previous = self.penetration_exceptions_seen.get(pair)
                 if previous is None or distance < previous:
                     self.penetration_exceptions_seen[pair] = distance
@@ -346,6 +545,7 @@ class Episode:
             )
         if self.total_steps % SAMPLE_EVERY_STEPS == 0:
             self._record_sample()
+            self._sync_viewer()
 
     def _hold(self, stage: str, steps: int, control: float | None = None) -> None:
         self.stage = stage
@@ -489,6 +689,7 @@ class Episode:
                 angular_speed <= float(self.thresholds["angular_speed_limit_rad_s"])
             ),
             "warnings_absent": not bool(warning_counts(self.data)),
+            "danger_zone_clear": self.danger_zone_violation is None,
             "finite_state": bool(
                 np.isfinite(self.data.qpos).all()
                 and np.isfinite(self.data.qvel).all()
@@ -516,165 +717,178 @@ class Episode:
             "linear_speed_below_limit",
             "angular_speed_below_limit",
             "warnings_absent",
+            "danger_zone_clear",
             "finite_state",
         )
         check["all_instantaneous_conditions"] = all(check[key] for key in condition_keys)
         return check
 
-    def run(self) -> dict[str, Any]:
-        status = "FAILED"
-        error_code: str | None = None
-        error_message: str | None = None
+    def initialize_task(self) -> dict[str, Any]:
+        """Prepare, settle, and validate the selected target before any skill runs."""
+        self.prepare()
+        self._hold("scene_settle", int(self.thresholds["scene_settle_steps"]))
+        self.target_center = self.data.geom_xpos[self.target_geom_id].copy()
+        initial_check = self._postconditions()
+        start_cube = self.data.xpos[self.cube_body_id].copy()
+        if (
+            abs(start_cube[2] - (self.table_top_z + self.cube_half_size[2])) > 0.003
+            or not initial_check["table_supported"]
+            or initial_check["cube_linear_speed_m_s"] > 0.01
+        ):
+            raise M2Failure("PRECONDITION_FAILED", "Cube did not settle on the table")
+        if initial_check["full_projected_footprint_inside_target_with_margin"]:
+            raise M2Failure("PRECONDITION_FAILED", "Cube starts inside the selected target")
+        return self._snapshot()
+
+    def pick_skill(self) -> dict[str, Any]:
+        """Pick the cube using M2's verified top grasp and return measured lift state."""
+        if not self.prepared or self.total_steps < int(self.thresholds["scene_settle_steps"]):
+            raise M2Failure("PRECONDITION_FAILED", "Episode has not passed scene initialization")
+        initial_check = self._postconditions()
+        start_cube = self.data.xpos[self.cube_body_id].copy()
+        if initial_check["full_projected_footprint_inside_target_with_margin"]:
+            raise M2Failure("PRECONDITION_FAILED", "Cube starts inside the selected target")
+
+        self._hold("open_before_pick", int(self.thresholds["gripper_open_steps"]), 255.0)
+        pregrasp = start_cube.copy()
+        pregrasp[2] += float(self.thresholds["pregrasp_clearance_m"])
+        self.move_ee("approach_above_cube", pregrasp)
+        grasp_pose = start_cube.copy()
+        self.move_ee("descend_to_grasp", grasp_pose)
+        self._hold("close_on_cube", int(self.thresholds["gripper_close_steps"]), 0.0)
+        sides = self._finger_contact_sides()
+        finger_qpos = self.data.qpos[self.finger_qpos_addresses].copy()
+        if len(sides) < 2 or np.min(finger_qpos) < float(
+            self.thresholds["finger_closed_contact_qpos_min_m"]
+        ):
+            raise M2Failure(
+                "GRASP_EMPTY",
+                f"No bilateral grasp detected; sides={len(sides)}, finger_qpos={finger_qpos.tolist()}",
+            )
+        self.grasp_relative_position = (
+            self.data.xpos[self.cube_body_id] - self.data.site_xpos[self.ee_site_id]
+        ).copy()
+        self._record_event(
+            "grasp_verified",
+            {
+                "finger_contact_side_count": len(sides),
+                "finger_qpos_m": finger_qpos,
+                "cube_to_ee_offset_m": self.grasp_relative_position,
+            },
+        )
+
+        lifted_pose = grasp_pose.copy()
+        lifted_pose[2] += float(self.thresholds["lift_height_m"])
+        self.move_ee("vertical_lift", lifted_pose, held=True)
+        lifted_cube = self.data.xpos[self.cube_body_id].copy()
+        achieved_lift = float(lifted_cube[2] - start_cube[2])
+        if achieved_lift < float(self.thresholds["minimum_lift_m"]):
+            raise M2Failure(
+                "GRASP_EMPTY",
+                f"Cube did not rise enough after grasp: {achieved_lift:.6f} m",
+            )
+        self._record_event("lift_verified", {"achieved_lift_m": achieved_lift})
+        return {
+            "achieved_lift_m": achieved_lift,
+            "finger_contact_side_count": len(sides),
+            "cube_to_ee_offset_m": self.grasp_relative_position.copy(),
+        }
+
+    def place_skill(self) -> dict[str, Any]:
+        """Transport and release the verified grasp at the selected M2 target."""
+        if self.grasp_relative_position is None or len(self._finger_contact_sides()) < 2:
+            raise M2Failure("PRECONDITION_FAILED", "Place requires a verified bilateral grasp")
+        cube_position = self.data.xpos[self.cube_body_id].copy()
+        if cube_position[2] < self.table_top_z + self.cube_half_size[2] + float(
+            self.thresholds["minimum_lift_m"]
+        ):
+            raise M2Failure("PRECONDITION_FAILED", "Place requires the cube to be lifted")
+
+        lifted_pose = self.data.mocap_pos[self.mocap_id].copy()
+        transit_pose = lifted_pose.copy()
+        transit_pose[:2] = self.target_center[:2]
+        self.move_ee(
+            "transport_to_target", transit_pose, held=True, require_transport_clearance=True
+        )
+        place_pose = transit_pose.copy()
+        place_pose[2] = (
+            self.table_top_z
+            + float(self.cube_half_size[2])
+            + float(self.thresholds["place_clearance_m"])
+        )
+        self.move_ee("lower_to_place", place_pose)
+        if len(self._finger_contact_sides()) < 2:
+            placement_contact = self._postconditions()
+            if not (
+                placement_contact["table_supported"]
+                and placement_contact["bottom_height_within_tolerance"]
+                and placement_contact["full_projected_footprint_inside_target_with_margin"]
+            ):
+                raise M2Failure(
+                    "OBJECT_SLIPPED",
+                    "Bilateral grasp ended before a supported in-target placement",
+                )
+        self._hold("release_cube", int(self.thresholds["gripper_open_steps"]), 255.0)
+        retreat_pose = place_pose.copy()
+        retreat_pose[2] += float(self.thresholds["pregrasp_clearance_m"])
+        self.move_ee("retreat_after_release", retreat_pose)
+        return {"target_center_m": self.target_center.copy()}
+
+    def verify_goal(self) -> tuple[int, dict[str, Any]]:
+        """Independently verify stable, supported placement against the selected target."""
+        self.stage = "post_place_stability"
+        self._record_event("phase_start", {"required_stable_steps": self.thresholds["stable_steps"]})
+        stable_required = int(self.thresholds["stable_steps"])
         stable_steps_observed = 0
-        final_check: dict[str, Any] | None = None
-        try:
-            self.stage = "reset_and_settle"
-            mujoco.mj_resetDataKeyframe(self.model, self.data, self.key_id)
-            self.data.qpos[self.cube_qpos_adr : self.cube_qpos_adr + 7] = np.array(
-                [*self.initial_cube_position, 1.0, 0.0, 0.0, 0.0]
-            )
-            self.data.ctrl[self.gripper_actuator_id] = 255.0
-            mujoco.mj_forward(self.model, self.data)
-            self.data.mocap_pos[self.mocap_id] = self.data.site_xpos[self.ee_site_id].copy()
-            self.ee_quat = np.empty(4, dtype=np.float64)
-            mujoco.mju_mat2Quat(self.ee_quat, self.data.site_xmat[self.ee_site_id])
-            self.data.mocap_quat[self.mocap_id] = self.ee_quat
-            mujoco.mj_forward(self.model, self.data)
-            self._record_event("reset_complete", {"cube_start_xyz_m": self.initial_cube_position})
-            self._hold("scene_settle", int(self.thresholds["scene_settle_steps"]))
-            self.target_center = self.data.geom_xpos[self.target_geom_id].copy()
-            initial_check = self._postconditions()
-            start_cube = self.data.xpos[self.cube_body_id].copy()
-            if (
-                abs(start_cube[2] - (self.table_top_z + self.cube_half_size[2])) > 0.003
-                or not initial_check["table_supported"]
-                or initial_check["cube_linear_speed_m_s"] > 0.01
-            ):
-                raise M2Failure("PRECONDITION_FAILED", "Cube did not settle on the table")
-            if initial_check["full_projected_footprint_inside_target_with_margin"]:
-                raise M2Failure("PRECONDITION_FAILED", "Cube starts inside the selected target")
-
-            self._hold("open_before_pick", int(self.thresholds["gripper_open_steps"]), 255.0)
-            pregrasp = start_cube.copy()
-            pregrasp[2] += float(self.thresholds["pregrasp_clearance_m"])
-            self._move_ee("approach_above_cube", pregrasp)
-            grasp_pose = start_cube.copy()
-            self._move_ee("descend_to_grasp", grasp_pose)
-            self._hold("close_on_cube", int(self.thresholds["gripper_close_steps"]), 0.0)
-            sides = self._finger_contact_sides()
-            finger_qpos = self.data.qpos[self.finger_qpos_addresses].copy()
-            if len(sides) < 2 or np.min(finger_qpos) < float(
-                self.thresholds["finger_closed_contact_qpos_min_m"]
-            ):
-                raise M2Failure(
-                    "GRASP_EMPTY",
-                    f"No bilateral grasp detected; sides={len(sides)}, finger_qpos={finger_qpos.tolist()}",
-                )
-            self.grasp_relative_position = (
-                self.data.xpos[self.cube_body_id] - self.data.site_xpos[self.ee_site_id]
-            ).copy()
-            self._record_event(
-                "grasp_verified",
-                {
-                    "finger_contact_side_count": len(sides),
-                    "finger_qpos_m": finger_qpos,
-                    "cube_to_ee_offset_m": self.grasp_relative_position,
-                },
-            )
-
-            lifted_pose = grasp_pose.copy()
-            lifted_pose[2] += float(self.thresholds["lift_height_m"])
-            self._move_ee("vertical_lift", lifted_pose, held=True)
-            lifted_cube = self.data.xpos[self.cube_body_id].copy()
-            achieved_lift = float(lifted_cube[2] - start_cube[2])
-            if achieved_lift < float(self.thresholds["minimum_lift_m"]):
-                raise M2Failure(
-                    "GRASP_EMPTY",
-                    f"Cube did not rise enough after grasp: {achieved_lift:.6f} m",
-                )
-            self._record_event("lift_verified", {"achieved_lift_m": achieved_lift})
-
-            transit_pose = lifted_pose.copy()
-            transit_pose[:2] = self.target_center[:2]
-            self._move_ee(
-                "transport_to_target", transit_pose, held=True, require_transport_clearance=True
-            )
-            place_pose = transit_pose.copy()
-            place_pose[2] = (
-                self.table_top_z
-                + float(self.cube_half_size[2])
-                + float(self.thresholds["place_clearance_m"])
-            )
-            self._move_ee("lower_to_place", place_pose)
-            if len(self._finger_contact_sides()) < 2:
-                placement_contact = self._postconditions()
-                if not (
-                    placement_contact["table_supported"]
-                    and placement_contact["bottom_height_within_tolerance"]
-                    and placement_contact["full_projected_footprint_inside_target_with_margin"]
-                ):
-                    raise M2Failure(
-                        "OBJECT_SLIPPED",
-                        "Bilateral grasp ended before a supported in-target placement",
-                    )
-            self._hold("release_cube", int(self.thresholds["gripper_open_steps"]), 255.0)
-            retreat_pose = place_pose.copy()
-            retreat_pose[2] += float(self.thresholds["pregrasp_clearance_m"])
-            self._move_ee("retreat_after_release", retreat_pose)
-
-            self.stage = "post_place_stability"
-            self._record_event("phase_start", {"required_stable_steps": self.thresholds["stable_steps"]})
-            stable_required = int(self.thresholds["stable_steps"])
-            for _ in range(int(self.thresholds["placement_settle_max_steps"])):
-                self._step()
-                final_check = self._postconditions()
-                if final_check["all_instantaneous_conditions"]:
-                    stable_steps_observed += 1
-                    if stable_steps_observed >= stable_required:
-                        break
-                else:
-                    stable_steps_observed = 0
+        final_check: dict[str, Any] = {}
+        for _ in range(int(self.thresholds["placement_settle_max_steps"])):
+            self._step()
             final_check = self._postconditions()
-            self._record_event(
-                "phase_end",
-                {"stable_steps_observed": stable_steps_observed, "postconditions": final_check},
-            )
-            if stable_steps_observed < stable_required:
-                false_conditions = [
-                    key
-                    for key in (
-                        "gripper_open",
-                        "no_gripper_contact",
-                        "table_supported",
-                        "bottom_height_within_tolerance",
-                        "full_projected_footprint_inside_target_with_margin",
-                        "linear_speed_below_limit",
-                        "angular_speed_below_limit",
-                        "warnings_absent",
-                        "finite_state",
-                    )
-                    if not final_check[key]
-                ]
-                raise M2Failure(
-                    "GOAL_NOT_MET",
-                    "Post-place conditions did not remain true for the required window: "
-                    + ", ".join(false_conditions),
+            if final_check["all_instantaneous_conditions"]:
+                stable_steps_observed += 1
+                if stable_steps_observed >= stable_required:
+                    break
+            else:
+                stable_steps_observed = 0
+        final_check = self._postconditions()
+        self._record_event(
+            "phase_end",
+            {"stable_steps_observed": stable_steps_observed, "postconditions": final_check},
+        )
+        if stable_steps_observed < stable_required:
+            false_conditions = [
+                key
+                for key in (
+                    "gripper_open",
+                    "no_gripper_contact",
+                    "table_supported",
+                    "bottom_height_within_tolerance",
+                    "full_projected_footprint_inside_target_with_margin",
+                    "linear_speed_below_limit",
+                    "angular_speed_below_limit",
+                    "warnings_absent",
+                    "danger_zone_clear",
+                    "finite_state",
                 )
-            status = "SUCCESS"
-        except M2Failure as error:
-            error_code, error_message = error.code, str(error)
-            self._record_event("episode_failed", {"error_code": error_code, "message": error_message})
-        except Exception as error:
-            error_code, error_message = "SIMULATION_ERROR", f"{type(error).__name__}: {error}"
-            self._record_event(
-                "episode_failed",
-                {
-                    "error_code": error_code,
-                    "message": error_message,
-                    "traceback": traceback.format_exc(),
-                },
+                if not final_check[key]
+            ]
+            raise M2Failure(
+                "GOAL_NOT_MET",
+                "Post-place conditions did not remain true for the required window: "
+                + ", ".join(false_conditions),
             )
+        return stable_steps_observed, final_check
 
+    def build_result(
+        self,
+        status: str,
+        error_code: str | None = None,
+        error_message: str | None = None,
+        stable_steps_observed: int = 0,
+        postconditions: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Create the common M2/M3 episode record from measured simulator state."""
+        final_check = postconditions
         if final_check is None:
             try:
                 final_check = self._postconditions()
@@ -697,16 +911,62 @@ class Episode:
             "contact_pair_minimum_distances_m": self.pair_min_distance,
             "penetration_exceptions_seen_m": self.penetration_exceptions_seen,
             "max_unilateral_contact_steps": self.max_unilateral_contact_steps,
+            "minimum_danger_zone_separation_m": (
+                self.minimum_danger_zone_separation
+                if math.isfinite(self.minimum_danger_zone_separation)
+                else None
+            ),
+            "danger_zone_violation": self.danger_zone_violation,
             "stable_steps_observed": stable_steps_observed,
             "postconditions": final_check,
             "events": self.events,
         }
         return self.result
 
+    def run(self) -> dict[str, Any]:
+        status = "FAILED"
+        error_code: str | None = None
+        error_message: str | None = None
+        stable_steps_observed = 0
+        final_check: dict[str, Any] | None = None
+        try:
+            self.initialize_task()
+            self.pick_skill()
+            self.place_skill()
+            stable_steps_observed, final_check = self.verify_goal()
+            status = "SUCCESS"
+        except ViewerClosed:
+            self._close_viewer()
+            raise
+        except M2Failure as error:
+            error_code, error_message = error.code, str(error)
+            self.record_failure(error_code, error_message)
+        except Exception as error:
+            error_code, error_message = "SIMULATION_ERROR", f"{type(error).__name__}: {error}"
+            self._record_event(
+                "episode_failed",
+                {
+                    "error_code": error_code,
+                    "message": error_message,
+                    "traceback": traceback.format_exc(),
+                },
+            )
+        self.build_result(status, error_code, error_message, stable_steps_observed, final_check)
+        title = "M2 TASK SUCCESS" if status == "SUCCESS" else f"M2 TASK FAILED: {error_code}"
+        self.set_viewer_status(title, error_message or "All postconditions remained satisfied")
+        return self.result
 
-def run_one(scenario: dict[str, Any], thresholds: dict[str, Any], output_dir: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-    episode = Episode(scenario, thresholds, output_dir)
+
+def run_one(
+    scenario: dict[str, Any],
+    thresholds: dict[str, Any],
+    output_dir: Path,
+    enable_viewer: bool = False,
+    show_ui: bool = False,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    episode = Episode(scenario, thresholds, output_dir, enable_viewer, show_ui)
     result = episode.run()
+    episode.wait_for_viewer_close()
     return result, episode.samples
 
 
@@ -715,6 +975,21 @@ def main() -> int:
     selection = parser.add_mutually_exclusive_group(required=True)
     selection.add_argument("--batch", action="store_true", help="run the frozen 10-scene list")
     selection.add_argument("--target", choices=("a", "b"), help="run one episode for target a or b")
+    parser.add_argument(
+        "--headless",
+        action="store_true",
+        help="run without the live viewer (single episodes show it by default; batches are headless by default)",
+    )
+    parser.add_argument(
+        "--viewer",
+        action="store_true",
+        help="show the live viewer for each episode in a batch",
+    )
+    parser.add_argument(
+        "--show-ui",
+        action="store_true",
+        help="show MuJoCo's native side panels with the live viewer",
+    )
     parser.add_argument("--seed", type=int, default=0, help="scenario seed for a single episode")
     parser.add_argument(
         "--output",
@@ -728,6 +1003,10 @@ def main() -> int:
         help="replace episodes.jsonl, trajectory.csv, and summary.json in the output directory",
     )
     args = parser.parse_args()
+    if args.headless and args.viewer:
+        parser.error("--headless and --viewer cannot be used together")
+    if args.viewer and not args.batch:
+        parser.error("--viewer is only needed with --batch; single episodes show the viewer by default")
 
     os.chdir(ROOT)
     scenario_data = load_json(SCENARIOS_PATH)
@@ -746,6 +1025,7 @@ def main() -> int:
             parser.error("The frozen scenario list must include at least five episodes per target")
     else:
         scenarios = [make_scenario(args.seed, args.target, scenario_data.get("scenarios", []))]
+    enable_viewer = not args.headless and (not args.batch or args.viewer)
 
     output_dir = args.output if args.output.is_absolute() else ROOT / args.output
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -763,7 +1043,13 @@ def main() -> int:
             f"[{scenario['scenario_id']}] target={scenario['target']} seed={scenario['seed']} "
             f"cube={scenario['cube_position_m']}"
         )
-        result, samples = run_one(scenario, thresholds, output_dir)
+        result, samples = run_one(
+            scenario,
+            thresholds,
+            output_dir,
+            enable_viewer=enable_viewer,
+            show_ui=args.show_ui,
+        )
         result["run_id"] = run_id
         episode_results.append(result)
         all_samples.extend(
@@ -794,6 +1080,8 @@ def main() -> int:
         "finger_qpos_m",
         "contacts",
         "minimum_contact_distance_so_far_m",
+        "minimum_danger_zone_separation_so_far_m",
+        "danger_zone_clear",
         "warnings",
         "finite_state",
     ]
@@ -811,6 +1099,7 @@ def main() -> int:
             )
 
     model = mujoco.MjModel.from_xml_path("assets/scene/panda_task.xml")
+    danger_zone_geom_id = name_id(model, mujoco.mjtObj.mjOBJ_GEOM, "danger_zone")
     summary = {
         "run_id": run_id,
         "date_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
@@ -826,6 +1115,13 @@ def main() -> int:
         "scenario_config_sha256": sha256(SCENARIOS_PATH),
         "threshold_config": "configs/m2_thresholds.json",
         "threshold_config_sha256": sha256(THRESHOLDS_PATH),
+        "danger_zone": {
+            "geom": "danger_zone",
+            "center_m": model.geom_pos[danger_zone_geom_id].tolist(),
+            "half_size_m": model.geom_size[danger_zone_geom_id].tolist(),
+            "clearance_m": float(thresholds["danger_zone_clearance_m"]),
+            "validated_geoms": "Panda collision geoms and cube_geom, every physics step",
+        },
         "scenario_count": len(episode_results),
         "success_count": sum(result["status"] == "SUCCESS" for result in episode_results),
         "failure_count": sum(result["status"] != "SUCCESS" for result in episode_results),
@@ -842,6 +1138,10 @@ def main() -> int:
                 "minimum_contact_distance_m": result["minimum_contact_distance_m"],
                 "penetration_exceptions_seen_m": result["penetration_exceptions_seen_m"],
                 "max_unilateral_contact_steps": result["max_unilateral_contact_steps"],
+                "minimum_danger_zone_separation_m": result[
+                    "minimum_danger_zone_separation_m"
+                ],
+                "danger_zone_violation": result["danger_zone_violation"],
                 "stable_steps_observed": result["stable_steps_observed"],
                 "postconditions": result["postconditions"],
             }
@@ -867,4 +1167,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except ViewerClosed:
+        print("Live viewer closed before the episode completed; no final evidence was written.")
+        raise SystemExit(130)

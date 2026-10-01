@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "status": "frozen",
+  "description": "Twenty preregistered M3 language cases: two target aliases for each of the ten frozen M2 scenes.",
+  "scenario_config": "configs/m2_scenarios.json",
+  "cases": [
+    {
+      "case_id": "m2_pose_00_a_utterance_1",
+      "scenario_id": "m2_pose_00_a",
+      "seed": 0,
+      "expected_target_id": "target_a",
+      "instruction": "把方块放到 A 区。"
+    },
+    {
+      "case_id": "m2_pose_00_a_utterance_2",
+      "scenario_id": "m2_pose_00_a",
+      "seed": 0,
+      "expected_target_id": "target_a",
+      "instruction": "Move the cube to the green target area."
+    },
+    {
+      "case_id": "m2_pose_00_b_utterance_1",
+      "scenario_id": "m2_pose_00_b",
+      "seed": 0,
+      "expected_target_id": "target_b",
+      "instruction": "把方块放到 B 区。"
+    },
+    {
+      "case_id": "m2_pose_00_b_utterance_2",
+      "scenario_id": "m2_pose_00_b",
+      "seed": 0,
+      "expected_target_id": "target_b",
+      "instruction": "Place the cube in the blue target area."
+    },
+    {
+      "case_id": "m2_pose_01_a_utterance_1",
+      "scenario_id": "m2_pose_01_a",
+      "seed": 1,
+      "expected_target_id": "target_a",
+      "instruction": "把方块放到 A 区。"
+    },
+    {
+      "case_id": "m2_pose_01_a_utterance_2",
+      "scenario_id": "m2_pose_01_a",
+      "seed": 1,
+      "expected_target_id": "target_a",
+      "instruction": "Move the cube to the green target area."
+    },
+    {
+      "case_id": "m2_pose_01_b_utterance_1",
+      "scenario_id": "m2_pose_01_b",
+      "seed": 1,
+      "expected_target_id": "target_b",
+      "instruction": "把方块放到 B 区。"
+    },
+    {
+      "case_id": "m2_pose_01_b_utterance_2",
+      "scenario_id": "m2_pose_01_b",
+      "seed": 1,
+      "expected_target_id": "target_b",
+      "instruction": "Place the cube in the blue target area."
+    },
+    {
+      "case_id": "m2_pose_02_a_utterance_1",
+      "scenario_id": "m2_pose_02_a",
+      "seed": 2,
+      "expected_target_id": "target_a",
+      "instruction": "把方块放到 A 区。"
+    },
+    {
+      "case_id": "m2_pose_02_a_utterance_2",
+      "scenario_id": "m2_pose_02_a",
+      "seed": 2,
+      "expected_target_id": "target_a",
+      "instruction": "Move the cube to the green target area."
+    },
+    {
+      "case_id": "m2_pose_02_b_utterance_1",
+      "scenario_id": "m2_pose_02_b",
+      "seed": 2,
+      "expected_target_id": "target_b",
+      "instruction": "把方块放到 B 区。"
+    },
+    {
+      "case_id": "m2_pose_02_b_utterance_2",
+      "scenario_id": "m2_pose_02_b",
+      "seed": 2,
+      "expected_target_id": "target_b",
+      "instruction": "Place the cube in the blue target area."
+    },
+    {
+      "case_id": "m2_pose_03_a_utterance_1",
+      "scenario_id": "m2_pose_03_a",
+      "seed": 3,
+      "expected_target_id": "target_a",
+      "instruction": "把方块放到 A 区。"
+    },
+    {
+      "case_id": "m2_pose_03_a_utterance_2",
+      "scenario_id": "m2_pose_03_a",
+      "seed": 3,
+      "expected_target_id": "target_a",
+      "instruction": "Move the cube to the green target area."
+    },
+    {
+      "case_id": "m2_pose_03_b_utterance_1",
+      "scenario_id": "m2_pose_03_b",
+      "seed": 3,
+      "expected_target_id": "target_b",
+      "instruction": "把方块放到 B 区。"
+    },
+    {
+      "case_id": "m2_pose_03_b_utterance_2",
+      "scenario_id": "m2_pose_03_b",
+      "seed": 3,
+      "expected_target_id": "target_b",
+      "instruction": "Place the cube in the blue target area."
+    },
+    {
+      "case_id": "m2_pose_04_a_utterance_1",
+      "scenario_id": "m2_pose_04_a",
+      "seed": 4,
+      "expected_target_id": "target_a",
+      "instruction": "把方块放到 A 区。"
+    },
+    {
+      "case_id": "m2_pose_04_a_utterance_2",
+      "scenario_id": "m2_pose_04_a",
+      "seed": 4,
+      "expected_target_id": "target_a",
+      "instruction": "Move the cube to the green target area."
+    },
+    {
+      "case_id": "m2_pose_04_b_utterance_1",
+      "scenario_id": "m2_pose_04_b",
+      "seed": 4,
+      "expected_target_id": "target_b",
+      "instruction": "把方块放到 B 区。"
+    },
+    {
+      "case_id": "m2_pose_04_b_utterance_2",
+      "scenario_id": "m2_pose_04_b",
+      "seed": 4,
+      "expected_target_id": "target_b",
+      "instruction": "Place the cube in the blue target area."
+    }
+  ]
+}

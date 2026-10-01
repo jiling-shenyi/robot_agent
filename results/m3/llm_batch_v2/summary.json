@@ -1,0 +1,1464 @@
+{
+  "phase": "M3",
+  "planner_kind": "llm",
+  "requested_model": "deepseek-flash",
+  "python_version": "3.13.9",
+  "mujoco_version": "3.14.0",
+  "scene_xml": "assets/scene/panda_task.xml",
+  "scene_xml_sha256": "c7ebb0ffb511a9c10542342f5e43897f954ebe09353d1c8cc78ccab7f0d9f2f5",
+  "scenario_config_sha256": "82240ffcf0c13bd088989a37078593fa657b7f47e67054a8dd90d7a374f2f633",
+  "threshold_config_sha256": "cba851d6ad1842614e4a4d8b6bc916594f78d46223e9d1cf45e0ac0fae1a218b",
+  "runtime_config": "configs/m3_runtime.json",
+  "runtime_config_sha256": "725c7c65c411de8d42d9ac8fe90e63e50736168ce0114dc52791262b6f802600",
+  "case_config_sha256": "cec71c7e4bf3820dd8fe7009ae2e78464236bd9070b9a9a2daaab07e4f249cb0",
+  "prompt_version": "m3-pick-place-json-v2",
+  "prompt_sha256": "6d91f8949bf03c07f294a1ef8c98e4cf0ac5b0656a1b90fec6b3becfb9019155",
+  "schema_version": 1,
+  "budgets": {
+    "planner_requests_per_episode": 1,
+    "planner_timeout_s": 30,
+    "max_output_tokens": 256,
+    "max_episode_steps": 30000,
+    "max_skill_calls": 2,
+    "pick_skill_steps": 10000,
+    "place_skill_steps": 12000,
+    "skill_retries": 0,
+    "replans": 0
+  },
+  "path_precheck": {
+    "danger_zone_clearance_m": 0.02,
+    "ee_payload_envelope_radius_m": 0.05,
+    "sample_spacing_m": 0.01
+  },
+  "credential_configured": true,
+  "run_id": "20260930T154506Z",
+  "date_utc": "2026-09-30T15:48:59.483159+00:00",
+  "episode_count": 20,
+  "success_count": 20,
+  "failure_count": 0,
+  "aborted_count": 0,
+  "not_run_count": 0,
+  "all_pass": true,
+  "episodes": [
+    {
+      "episode_id": "20260930T154506Z-001-m2_pose_00_a_utterance_1",
+      "case_id": "m2_pose_00_a_utterance_1",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_a",
+      "expected_target_id": "target_a",
+      "step_count": 15828,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 684,
+        "total_tokens": 727,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 0,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 684
+      },
+      "wall_time_s": 10.117222,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800826630401811,
+          -0.12018441233535694,
+          0.42492049380696495
+        ],
+        "cube_bottom_z_m": 0.39992049379889083,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950620110919182e-05,
+        "cube_linear_speed_m_s": 1.6059644968224692e-10,
+        "cube_angular_speed_rad_s": 1.8451480409102913e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550711074254803,
+          -0.14519596795268186
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050942186548819,
+          -0.09517285671803201
+        ],
+        "finger_qpos_m": [
+          0.039999978928232954,
+          0.04000000024018388
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-002-m2_pose_00_a_utterance_2",
+      "case_id": "m2_pose_00_a_utterance_2",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_a",
+      "expected_target_id": "target_a",
+      "step_count": 15828,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 686,
+        "total_tokens": 729,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 512,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 512,
+        "prompt_cache_miss_tokens": 174
+      },
+      "wall_time_s": 10.440862,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800826630401811,
+          -0.12018441233535694,
+          0.42492049380696495
+        ],
+        "cube_bottom_z_m": 0.39992049379889083,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950620110919182e-05,
+        "cube_linear_speed_m_s": 1.6059644968224692e-10,
+        "cube_angular_speed_rad_s": 1.8451480409102913e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550711074254803,
+          -0.14519596795268186
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050942186548819,
+          -0.09517285671803201
+        ],
+        "finger_qpos_m": [
+          0.039999978928232954,
+          0.04000000024018388
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-003-m2_pose_00_b_utterance_1",
+      "case_id": "m2_pose_00_b_utterance_1",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_b",
+      "expected_target_id": "target_b",
+      "step_count": 18331,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 684,
+        "total_tokens": 727,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 0,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 684
+      },
+      "wall_time_s": 13.435189,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800694275715819,
+          0.11993032860939026,
+          0.4249204938069649
+        ],
+        "cube_bottom_z_m": 0.3999204938007026,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950619929741887e-05,
+        "cube_linear_speed_m_s": 1.8424338318189389e-10,
+        "cube_angular_speed_rad_s": 5.901997772093905e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          0.05499999999999999
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          0.185
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550682877950164,
+          0.0949291888384238
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050705673481473,
+          0.14493146838035673
+        ],
+        "finger_qpos_m": [
+          0.03999998249884998,
+          0.04000000025757683
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-004-m2_pose_00_b_utterance_2",
+      "case_id": "m2_pose_00_b_utterance_2",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_b",
+      "expected_target_id": "target_b",
+      "step_count": 18331,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 686,
+        "total_tokens": 729,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 512,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 512,
+        "prompt_cache_miss_tokens": 174
+      },
+      "wall_time_s": 12.894112,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800694275715819,
+          0.11993032860939026,
+          0.4249204938069649
+        ],
+        "cube_bottom_z_m": 0.3999204938007026,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950619929741887e-05,
+        "cube_linear_speed_m_s": 1.8424338318189389e-10,
+        "cube_angular_speed_rad_s": 5.901997772093905e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          0.05499999999999999
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          0.185
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550682877950164,
+          0.0949291888384238
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050705673481473,
+          0.14493146838035673
+        ],
+        "finger_qpos_m": [
+          0.03999998249884998,
+          0.04000000025757683
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-005-m2_pose_01_a_utterance_1",
+      "case_id": "m2_pose_01_a_utterance_1",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_a",
+      "expected_target_id": "target_a",
+      "step_count": 15288,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 683,
+        "total_tokens": 726,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 128,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 555
+      },
+      "wall_time_s": 9.944868,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800825380483492,
+          -0.12019470176096353,
+          0.42492049380696495
+        ],
+        "cube_bottom_z_m": 0.39992049379919314,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950620080687809e-05,
+        "cube_linear_speed_m_s": 1.5885125213185062e-10,
+        "cube_angular_speed_rad_s": 2.6921734387948395e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550685458594187,
+          -0.14520869395307676
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050965302372797,
+          -0.0951807095688503
+        ],
+        "finger_qpos_m": [
+          0.039999978928232954,
+          0.04000000024018389
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-006-m2_pose_01_a_utterance_2",
+      "case_id": "m2_pose_01_a_utterance_2",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_a",
+      "expected_target_id": "target_a",
+      "step_count": 15288,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 685,
+        "total_tokens": 728,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 128,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 557
+      },
+      "wall_time_s": 10.07422,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800825380483492,
+          -0.12019470176096353,
+          0.42492049380696495
+        ],
+        "cube_bottom_z_m": 0.39992049379919314,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950620080687809e-05,
+        "cube_linear_speed_m_s": 1.5885125213185062e-10,
+        "cube_angular_speed_rad_s": 2.6921734387948395e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550685458594187,
+          -0.14520869395307676
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050965302372797,
+          -0.0951807095688503
+        ],
+        "finger_qpos_m": [
+          0.039999978928232954,
+          0.04000000024018389
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-007-m2_pose_01_b_utterance_1",
+      "case_id": "m2_pose_01_b_utterance_1",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_b",
+      "expected_target_id": "target_b",
+      "step_count": 17773,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 683,
+        "total_tokens": 726,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 128,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 555
+      },
+      "wall_time_s": 13.385151,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800675180849221,
+          0.11993421250160557,
+          0.42492049380696495
+        ],
+        "cube_bottom_z_m": 0.39992049380055766,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950619944235848e-05,
+        "cube_linear_speed_m_s": 1.8706169253230281e-10,
+        "cube_angular_speed_rad_s": 4.49940693186893e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          0.05499999999999999
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          0.185
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550660945061736,
+          0.09493278892860774
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050689416636705,
+          0.1449356360746034
+        ],
+        "finger_qpos_m": [
+          0.03999998249884998,
+          0.04000000025757683
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-008-m2_pose_01_b_utterance_2",
+      "case_id": "m2_pose_01_b_utterance_2",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_b",
+      "expected_target_id": "target_b",
+      "step_count": 17773,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 685,
+        "total_tokens": 728,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 128,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 557
+      },
+      "wall_time_s": 13.230052,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800675180849221,
+          0.11993421250160557,
+          0.42492049380696495
+        ],
+        "cube_bottom_z_m": 0.39992049380055766,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950619944235848e-05,
+        "cube_linear_speed_m_s": 1.8706169253230281e-10,
+        "cube_angular_speed_rad_s": 4.49940693186893e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          0.05499999999999999
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          0.185
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550660945061736,
+          0.09493278892860774
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050689416636705,
+          0.1449356360746034
+        ],
+        "finger_qpos_m": [
+          0.03999998249884998,
+          0.04000000025757683
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-009-m2_pose_02_a_utterance_1",
+      "case_id": "m2_pose_02_a_utterance_1",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_a",
+      "expected_target_id": "target_a",
+      "step_count": 14753,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 683,
+        "total_tokens": 726,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 128,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 555
+      },
+      "wall_time_s": 9.722707,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800831889411504,
+          -0.12019420771401469,
+          0.424920493806965
+        ],
+        "cube_bottom_z_m": 0.3999204937982639,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950620173613476e-05,
+        "cube_linear_speed_m_s": 1.6441700578402857e-10,
+        "cube_angular_speed_rad_s": 1.856315990987347e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550687700481192,
+          -0.14520862660738554
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050976078341816,
+          -0.09517978882064385
+        ],
+        "finger_qpos_m": [
+          0.039999978928232954,
+          0.04000000024018388
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-010-m2_pose_02_a_utterance_2",
+      "case_id": "m2_pose_02_a_utterance_2",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_a",
+      "expected_target_id": "target_a",
+      "step_count": 14753,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 685,
+        "total_tokens": 728,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 128,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 557
+      },
+      "wall_time_s": 9.737557,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800831889411504,
+          -0.12019420771401469,
+          0.424920493806965
+        ],
+        "cube_bottom_z_m": 0.3999204937982639,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950620173613476e-05,
+        "cube_linear_speed_m_s": 1.6441700578402857e-10,
+        "cube_angular_speed_rad_s": 1.856315990987347e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550687700481192,
+          -0.14520862660738554
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050976078341816,
+          -0.09517978882064385
+        ],
+        "finger_qpos_m": [
+          0.039999978928232954,
+          0.04000000024018388
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-011-m2_pose_02_b_utterance_1",
+      "case_id": "m2_pose_02_b_utterance_1",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_b",
+      "expected_target_id": "target_b",
+      "step_count": 17215,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 683,
+        "total_tokens": 726,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 128,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 555
+      },
+      "wall_time_s": 12.969014,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800666742078162,
+          0.11994766377025791,
+          0.4249204938069649
+        ],
+        "cube_bottom_z_m": 0.3999204938005152,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950619948482451e-05,
+        "cube_linear_speed_m_s": 1.8816205429350706e-10,
+        "cube_angular_speed_rad_s": 4.5258763008341055e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          0.05499999999999999
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          0.185
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550659789320056,
+          0.094946968500227
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050673694836268,
+          0.14494835904028883
+        ],
+        "finger_qpos_m": [
+          0.0399999825554777,
+          0.04000000025737541
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-012-m2_pose_02_b_utterance_2",
+      "case_id": "m2_pose_02_b_utterance_2",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_b",
+      "expected_target_id": "target_b",
+      "step_count": 17215,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 685,
+        "total_tokens": 728,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 128,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 557
+      },
+      "wall_time_s": 13.801381,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800666742078162,
+          0.11994766377025791,
+          0.4249204938069649
+        ],
+        "cube_bottom_z_m": 0.3999204938005152,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950619948482451e-05,
+        "cube_linear_speed_m_s": 1.8816205429350706e-10,
+        "cube_angular_speed_rad_s": 4.5258763008341055e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          0.05499999999999999
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          0.185
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550659789320056,
+          0.094946968500227
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050673694836268,
+          0.14494835904028883
+        ],
+        "finger_qpos_m": [
+          0.0399999825554777,
+          0.04000000025737541
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-013-m2_pose_03_a_utterance_1",
+      "case_id": "m2_pose_03_a_utterance_1",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_a",
+      "expected_target_id": "target_a",
+      "step_count": 15303,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 682,
+        "total_tokens": 725,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 128,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 554
+      },
+      "wall_time_s": 10.393677,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800060642960836,
+          -0.09782015754773449,
+          0.424920493806965
+        ],
+        "cube_bottom_z_m": 0.39992049380060596,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950619939406378e-05,
+        "cube_linear_speed_m_s": 1.689863527261686e-10,
+        "cube_angular_speed_rad_s": 3.6675306104244256e-10,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.55493326867605,
+          -0.12289295317410856
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050788599161172,
+          -0.07274736192136042
+        ],
+        "finger_qpos_m": [
+          0.039999978928232954,
+          0.04000000024018388
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-014-m2_pose_03_a_utterance_2",
+      "case_id": "m2_pose_03_a_utterance_2",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_a",
+      "expected_target_id": "target_a",
+      "step_count": 15303,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 684,
+        "total_tokens": 727,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 128,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 556
+      },
+      "wall_time_s": 9.960708,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800060642960836,
+          -0.09782015754773449,
+          0.424920493806965
+        ],
+        "cube_bottom_z_m": 0.39992049380060596,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950619939406378e-05,
+        "cube_linear_speed_m_s": 1.689863527261686e-10,
+        "cube_angular_speed_rad_s": 3.6675306104244256e-10,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.55493326867605,
+          -0.12289295317410856
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050788599161172,
+          -0.07274736192136042
+        ],
+        "finger_qpos_m": [
+          0.039999978928232954,
+          0.04000000024018388
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-015-m2_pose_03_b_utterance_1",
+      "case_id": "m2_pose_03_b_utterance_1",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_b",
+      "expected_target_id": "target_b",
+      "step_count": 17914,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 682,
+        "total_tokens": 725,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 128,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 554
+      },
+      "wall_time_s": 13.084746,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800560745364987,
+          0.12659023214017653,
+          0.424920493806965
+        ],
+        "cube_bottom_z_m": 0.3999204937995815,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950620041852208e-05,
+        "cube_linear_speed_m_s": 1.990330879737333e-10,
+        "cube_angular_speed_rad_s": 7.025700590880429e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          0.05499999999999999
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          0.185
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550149072842608,
+          0.10154906489166733
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050972417887365,
+          0.15163139938868575
+        ],
+        "finger_qpos_m": [
+          0.03999998251147027,
+          0.04000000025754014
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-016-m2_pose_03_b_utterance_2",
+      "case_id": "m2_pose_03_b_utterance_2",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_b",
+      "expected_target_id": "target_b",
+      "step_count": 17914,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 684,
+        "total_tokens": 727,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 128,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 556
+      },
+      "wall_time_s": 12.96273,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800560745364987,
+          0.12659023214017653,
+          0.424920493806965
+        ],
+        "cube_bottom_z_m": 0.3999204937995815,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950620041852208e-05,
+        "cube_linear_speed_m_s": 1.990330879737333e-10,
+        "cube_angular_speed_rad_s": 7.025700590880429e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          0.05499999999999999
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          0.185
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550149072842608,
+          0.10154906489166733
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050972417887365,
+          0.15163139938868575
+        ],
+        "finger_qpos_m": [
+          0.03999998251147027,
+          0.04000000025754014
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-017-m2_pose_04_a_utterance_1",
+      "case_id": "m2_pose_04_a_utterance_1",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_a",
+      "expected_target_id": "target_a",
+      "step_count": 14756,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 682,
+        "total_tokens": 725,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 128,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 554
+      },
+      "wall_time_s": 9.576207,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5799235089823245,
+          -0.1343363850267131,
+          0.42492049380696495
+        ],
+        "cube_bottom_z_m": 0.3999204938010591,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950619894092625e-05,
+        "cube_linear_speed_m_s": 1.5798747432802428e-10,
+        "cube_angular_speed_rad_s": 2.677536121514737e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.5549146044612807,
+          -0.15934528955366062
+        ],
+        "projected_cube_xy_max_m": [
+          0.6049324135033682,
+          -0.10932748049976558
+        ],
+        "finger_qpos_m": [
+          0.03999997898792597,
+          0.040000000239610305
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-018-m2_pose_04_a_utterance_2",
+      "case_id": "m2_pose_04_a_utterance_2",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_a",
+      "expected_target_id": "target_a",
+      "step_count": 14756,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 684,
+        "total_tokens": 727,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 128,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 556
+      },
+      "wall_time_s": 9.598706,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5799235089823245,
+          -0.1343363850267131,
+          0.42492049380696495
+        ],
+        "cube_bottom_z_m": 0.3999204938010591,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950619894092625e-05,
+        "cube_linear_speed_m_s": 1.5798747432802428e-10,
+        "cube_angular_speed_rad_s": 2.677536121514737e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.5549146044612807,
+          -0.15934528955366062
+        ],
+        "projected_cube_xy_max_m": [
+          0.6049324135033682,
+          -0.10932748049976558
+        ],
+        "finger_qpos_m": [
+          0.03999997898792597,
+          0.040000000239610305
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-019-m2_pose_04_b_utterance_1",
+      "case_id": "m2_pose_04_b_utterance_1",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_b",
+      "expected_target_id": "target_b",
+      "step_count": 17357,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 682,
+        "total_tokens": 725,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 128,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 554
+      },
+      "wall_time_s": 12.588142,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5799269119586574,
+          0.13357330162673461,
+          0.42492049380696517
+        ],
+        "cube_bottom_z_m": 0.399920493801333,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950619866703423e-05,
+        "cube_linear_speed_m_s": 1.527182244047973e-10,
+        "cube_angular_speed_rad_s": 3.7908695320064605e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          0.05499999999999999
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          0.185
+        ],
+        "projected_cube_xy_min_m": [
+          0.5547962109238905,
+          0.10844260058636508
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050576129934243,
+          0.15870400266710413
+        ],
+        "finger_qpos_m": [
+          0.03999998263331839,
+          0.04000000025698051
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    },
+    {
+      "episode_id": "20260930T154506Z-020-m2_pose_04_b_utterance_2",
+      "case_id": "m2_pose_04_b_utterance_2",
+      "status": "SUCCESS",
+      "error_code": null,
+      "target_id": "target_b",
+      "expected_target_id": "target_b",
+      "step_count": 17357,
+      "planner_kind": "llm",
+      "llm_request_count": 1,
+      "token_usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 684,
+        "total_tokens": 727,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 128,
+          "image_tokens": null,
+          "text_tokens": null
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 556
+      },
+      "wall_time_s": 12.637883,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5799269119586574,
+          0.13357330162673461,
+          0.42492049380696517
+        ],
+        "cube_bottom_z_m": 0.399920493801333,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950619866703423e-05,
+        "cube_linear_speed_m_s": 1.527182244047973e-10,
+        "cube_angular_speed_rad_s": 3.7908695320064605e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          0.05499999999999999
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          0.185
+        ],
+        "projected_cube_xy_min_m": [
+          0.5547962109238905,
+          0.10844260058636508
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050576129934243,
+          0.15870400266710413
+        ],
+        "finger_qpos_m": [
+          0.03999998263331839,
+          0.04000000025698051
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    }
+  ]
+}

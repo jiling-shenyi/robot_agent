@@ -1,0 +1,136 @@
+{
+  "phase": "M1/M2 danger-zone fault injection",
+  "scene_xml": "assets/scene/panda_task.xml",
+  "scene_xml_sha256": "c7ebb0ffb511a9c10542342f5e43897f954ebe09353d1c8cc78ccab7f0d9f2f5",
+  "m1_danger_zone_validation": {
+    "geom": "danger_zone",
+    "world_center_m": [
+      0.82,
+      0.28,
+      0.535
+    ],
+    "half_size_m": [
+      0.06,
+      0.06,
+      0.135
+    ],
+    "rgba": [
+      0.949999988079071,
+      0.07999999821186066,
+      0.05000000074505806,
+      0.3400000035762787
+    ],
+    "bottom_z_m": 0.4,
+    "table_top_z_m": 0.4,
+    "collision_masks": {
+      "contype": 0,
+      "conaffinity": 0
+    },
+    "checks": {
+      "named_geom_exists": true,
+      "fixed_in_world": true,
+      "box_matches_visible_volume": true,
+      "expected_center": true,
+      "expected_half_size": true,
+      "expected_red_translucent_color": true,
+      "visual_only_no_physics_contact": true,
+      "axis_aligned": true,
+      "bottom_aligned_with_tabletop": true,
+      "inside_table_footprint": true,
+      "finite_positive_volume": true
+    },
+    "passed": true
+  },
+  "fault_injection": {
+    "expected_error_code": "DANGER_ZONE_VIOLATION",
+    "observed_error_code": "DANGER_ZONE_VIOLATION",
+    "step_count": 1,
+    "danger_zone_clear": false,
+    "violation": {
+      "phase": "danger_zone_fault_injection",
+      "step": 1,
+      "geom": "cube:cube_geom",
+      "distance_m": 0.0,
+      "required_clearance_m": 0.02,
+      "closest_points_m": [
+        [
+          0.82,
+          0.28,
+          0.535
+        ],
+        [
+          0.82,
+          0.28,
+          0.535
+        ]
+      ]
+    },
+    "injected_geom": "cube:cube_geom",
+    "injected_cube_center_m": [
+      0.82,
+      0.28,
+      0.535
+    ],
+    "observed_error_message": "cube:cube_geom came within 20.0 mm of danger_zone (separation=0.000 mm)",
+    "sim_time_s": 0.002
+  },
+  "events": [
+    {
+      "event": "danger_zone_violation",
+      "state": {
+        "phase": "danger_zone_fault_injection",
+        "step": 1,
+        "sim_time_s": 0.002,
+        "ee_target_xyz_m": [
+          0.3,
+          0.0,
+          0.5
+        ],
+        "ee_actual_xyz_m": [
+          0.5544994780317354,
+          -5.186760451828153e-33,
+          0.5211024294875892
+        ],
+        "ee_position_error_m": 0.25537285848089736,
+        "cube_xyz_m": [
+          0.82,
+          0.28,
+          0.535
+        ],
+        "cube_linear_speed_m_s": 0.0,
+        "cube_angular_speed_rad_s": 0.0,
+        "gripper_ctrl": 255.0,
+        "finger_qpos_m": [
+          0.040011382249924406,
+          0.039988617750077234
+        ],
+        "contacts": [],
+        "minimum_contact_distance_so_far_m": null,
+        "minimum_danger_zone_separation_so_far_m": 0.0,
+        "danger_zone_clear": false,
+        "warnings": {},
+        "finite_state": true
+      },
+      "detail": {
+        "phase": "danger_zone_fault_injection",
+        "step": 1,
+        "geom": "cube:cube_geom",
+        "distance_m": 0.0,
+        "required_clearance_m": 0.02,
+        "closest_points_m": [
+          [
+            0.82,
+            0.28,
+            0.535
+          ],
+          [
+            0.82,
+            0.28,
+            0.535
+          ]
+        ]
+      }
+    }
+  ],
+  "passed": true
+}

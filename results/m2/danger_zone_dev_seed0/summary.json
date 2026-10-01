@@ -1,0 +1,132 @@
+{
+  "run_id": "20260928T092411Z",
+  "date_utc": "2026-09-28T09:24:19.484121+00:00",
+  "phase": "M2",
+  "mujoco_version": "3.14.0",
+  "numpy_version": "2.5.3",
+  "scene_xml": "assets/scene/panda_task.xml",
+  "scene_xml_sha256": "c7ebb0ffb511a9c10542342f5e43897f954ebe09353d1c8cc78ccab7f0d9f2f5",
+  "panda_mocap_xml_sha256": "9de3cd81e1c3ee3e5374257a66e0356f2cac8b2b5ab2667621c51f99eb73d2c8",
+  "scenario_config": "configs/m2_scenarios.json",
+  "scenario_config_sha256": "3841b817dec6188aa60050985cf4193755111b664035693d76b7ea92ba6a34cb",
+  "threshold_config": "configs/m2_thresholds.json",
+  "threshold_config_sha256": "db74d6683a73414d5919b998f72c6f355acb8df625dc254f83e20c001daca9e4",
+  "danger_zone": {
+    "geom": "danger_zone",
+    "center_m": [
+      0.82,
+      0.28,
+      0.535
+    ],
+    "half_size_m": [
+      0.06,
+      0.06,
+      0.135
+    ],
+    "clearance_m": 0.02,
+    "validated_geoms": "Panda collision geoms and cube_geom, every physics step"
+  },
+  "scenario_count": 1,
+  "success_count": 1,
+  "failure_count": 0,
+  "all_pass": true,
+  "episodes": [
+    {
+      "scenario_id": "m2_pose_00_a",
+      "seed": 0,
+      "target": "a",
+      "status": "SUCCESS",
+      "error_code": null,
+      "step_count": 15828,
+      "max_ee_position_error_m": 0.0030210244822606656,
+      "minimum_contact_distance_m": -0.004968622836712993,
+      "penetration_exceptions_seen_m": {},
+      "max_unilateral_contact_steps": 0,
+      "minimum_danger_zone_separation_m": 0.2249005663202372,
+      "danger_zone_violation": null,
+      "stable_steps_observed": 250,
+      "postconditions": {
+        "gripper_open": true,
+        "no_gripper_contact": true,
+        "table_supported": true,
+        "bottom_height_within_tolerance": true,
+        "full_projected_footprint_inside_target_with_margin": true,
+        "linear_speed_below_limit": true,
+        "angular_speed_below_limit": true,
+        "warnings_absent": true,
+        "danger_zone_clear": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.5800826630401811,
+          -0.12018441233535694,
+          0.42492049380696495
+        ],
+        "cube_bottom_z_m": 0.39992049379889083,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 7.950620110919182e-05,
+        "cube_linear_speed_m_s": 1.6059644968224692e-10,
+        "cube_angular_speed_rad_s": 1.8451480409102913e-09,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.5550711074254803,
+          -0.14519596795268186
+        ],
+        "projected_cube_xy_max_m": [
+          0.6050942186548819,
+          -0.09517285671803201
+        ],
+        "finger_qpos_m": [
+          0.039999978928232954,
+          0.04000000024018388
+        ],
+        "gripper_contact": false,
+        "all_instantaneous_conditions": true
+      }
+    }
+  ],
+  "model_dimensions": {
+    "nbody": 15,
+    "ngeom": 87,
+    "nu": 8,
+    "neq": 2,
+    "timestep_s": 0.002
+  },
+  "thresholds": {
+    "schema_version": 1,
+    "status": "frozen",
+    "description": "Frozen for 10-scene pick/place and danger-zone validation. A recorded Panda link4/table contact has a separate 6.5 mm diagnostic ceiling; every other pair keeps the 5 mm limit.",
+    "motion_max_step_m": 8e-05,
+    "terminal_dwell_steps": 150,
+    "gripper_close_steps": 350,
+    "gripper_open_steps": 350,
+    "scene_settle_steps": 1000,
+    "placement_settle_max_steps": 1500,
+    "stable_steps": 250,
+    "max_episode_steps": 30000,
+    "ee_error_limit_m": 0.02,
+    "pregrasp_clearance_m": 0.1,
+    "lift_height_m": 0.12,
+    "minimum_lift_m": 0.08,
+    "place_clearance_m": 0.006,
+    "grasp_relative_drift_limit_m": 0.015,
+    "target_margin_m": 0.01,
+    "danger_zone_clearance_m": 0.02,
+    "linear_speed_limit_m_s": 0.01,
+    "angular_speed_limit_rad_s": 0.1,
+    "table_support_tolerance_m": 0.003,
+    "penetration_limit_m": 0.005,
+    "finger_open_qpos_min_m": 0.03,
+    "finger_closed_contact_qpos_min_m": 0.01,
+    "gripper_unilateral_contact_grace_steps": 50,
+    "contact_penetration_exceptions_m": {
+      "link4:geom28 <-> table:table_top": 0.0065
+    }
+  }
+}

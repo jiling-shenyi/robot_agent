@@ -84,3 +84,33 @@
 - **开发失败与修复：** 快速轨迹初版暴露出长距离搬运的接触深度和放置触桌时过早判滑落；收慢至 `0.08 mm/step`，加入 50 步单侧接触滞回，并将低位放置判定为“接触丢失后必须已获桌面支撑且落在目标内”后，10 个开发场景全部通过。早期失败轨迹保存在 `results/m2/dev_sweep_10/`；最终阈值标定 sweep 保存在 `results/m2/dev_sweep_6mm_a/` 和 `results/m2/dev_sweep_6mm_b/`。
 - **证据文件：** `results/m2/acceptance/episodes.jsonl`、`trajectory.csv`、`summary.json`；同配置复跑记录在 `results/m2/acceptance_repeat/`。每 25 个物理步（50 ms）写一条轨迹样本，逐物理步执行状态、接触、警告、穿透和末端误差检查。
 - **能力边界与下一步：** M2 证明固定场景内的确定性单方块模拟搬运，不证明视觉、Agent、自动恢复、真实机器人或 Sim2Real。可进入 M3，但应在模型/碰撞验证中继续关注 `link4` 与桌面的已知 5.986 mm 接触。
+
+### D-003：加入危险区并在 M2 逐步执行约束检查
+
+- **日期 / 阶段：** 2026-09-28 / M1 场景与 M2 安全约束补充
+- **背景：** 原场景只有 A/B 两个目标标记，没有禁止区；M3 Agent 没有可遵守的空间禁入边界。先在共享 MuJoCo 场景加入危险区，并让现有确定性 M2 作为硬闸门验证每一步的实际几何状态。
+- **配置与实现：** `assets/scene/panda_task.xml` 增加纯视觉红色 `danger_zone` box，中心 `(0.82, 0.28, 0.535) m`、半尺寸 `(0.06, 0.06, 0.135) m`，collision mask 为 0，不更改物理接触。`configs/m2_thresholds.json` 固定 20 mm 边距；M2 每个仿真步用 `mj_geomDistance` 检查所有启用碰撞的 Panda 几何和方块几何。距离小于边距时记录 `DANGER_ZONE_VIOLATION`、部件标签、阶段、步数、距离与最近点；episode 后置条件和 trajectory/summary 均保留危险区状态。
+- **实测结果：** M1 headless smoke 的模型加载、末端跟踪、夹爪和场景静置均通过，截图可见红色危险柱。新版固定 M2 清单正式运行及完整复跑均为 `10/10`；两轮状态、步数、最终方块位置及最近危险区间距逐项一致，全轨迹最近间距 `113.255 mm`。将方块置入危险体积的故障注入返回 `DANGER_ZONE_VIOLATION`，最终后置条件 `danger_zone_clear=false`。
+- **修正记录：** 插入场景 geom 后，MuJoCo 对 Panda link4 碰撞几何的回退标签从 `geom28` 改为 `geom29`。首次新版批量运行 2/10；检查日志确认其余失败均是 link4/table 例外仍引用旧标签，并非危险区违规。为避免依赖不稳定的 geom 编号，最终阈值键改为稳定刚体对 `link4 <-> table`；最终配置的新版清单和复跑均全过。保留首次失败结果以便追溯。
+- **限制 / 下一步：** 这是 MuJoCo 几何与配置边距上的软件约束，不证明真实机器人的安全距离。M3 应把 `danger_zone` 空间范围纳入公开场景观测，并在计划执行前做路径/动作闸门；M2 的逐步监测负责阻断确定性执行偏离。
+- **证据：** `configs/m2_scenarios.json`、`configs/m2_thresholds.json`、`scripts/m2_pick_place.py`、`scripts/m2_danger_zone_fault_injection.py`、`results/m1/danger_zone_smoke/`、`results/m2/acceptance_danger_zone_body_pair/`、`results/m2/acceptance_danger_zone_body_pair_repeat/`、`results/m2/dev_danger_zone_exception/`、`results/m2/danger_zone_fault_injection/`。
+- **回归检查（2026-09-28）：** M1 smoke 增加 `danger_zone` 的固定世界坐标、尺寸、红色半透明外观、纯视觉掩码、桌面贴合和桌面范围检查；headless smoke 全门槛通过。新故障注入脚本把方块放到危险区中心并运行一个正常 M2 物理步，确认 `cube:cube_geom` 触发 `DANGER_ZONE_VIOLATION`，且记录 `danger_zone_clear=false`。M1 运行截图可见红色危险柱。\n
+### D-004：危险区故障注入改为真实机械臂运动
+- **背景：** 原可视故障示例把方块直接写入危险区中心并推进一步。Viewer 能显示违规方块，但 Panda 保持在 home 姿态，未展示机器人动作，也没有验证手臂碰撞几何触发守卫。
+- **架构修正：** M2 抽取 `Episode.prepare()` 统一重置方块并将 mocap 目标对齐真实 `ee_site`，增加 `Episode.move_ee()` 作为正常任务和诊断场景共用的受守卫保护控制入口。M2 episode 结束后更新 Viewer 结果状态并保持窗口打开，直到用户关闭。
+- **示例修正：** `m2_danger_zone_fault_injection.py` 现在从 home 姿态朝共享危险区中心运动，不移动方块；M2 每个物理步仍检查 Panda 全部碰撞几何和原有 20 mm 安全边距。报告校验实际末端位移超过 100 mm、违规部件不是方块、错误码为 `DANGER_ZONE_VIOLATION`。
+- **可复现轨迹证据：** 在当前配置下，真实 mocap 控制约 2995 个物理步时由 `link7:geom62` 触发，最小间距约 19.963 mm；末端已移动约 0.24 m。守卫按 20 mm 安全边距拦停，因此可视结果是机械臂进入安全边距并停在危险体积外缘，而不是发生物理接触。场景危险区和冻结阈值均未修改。
+- **规则：** `AGENTS.md` 明确要求违规示例走正常机器人控制与安全守卫链路，并展示部件、阈值和结果；Viewer 与结构化证据均保持可检查。
+
+### M3：受约束 Agent 闭环
+
+- **日期 / 阶段：** 2026-09-30 / M3 完成
+- **实现：** 从共享 M2 episode 提取 `initialize_task()`、`pick_skill()`、`place_skill()`、`verify_goal()` 和 `build_result()`；M2 原入口仍调用相同技能。新增 `src/embodied_agent/contracts.py`、`planner.py`、`runtime.py` 与 `scripts/m3_agent.py`，提供目标别名解析、真值观测、严格计划 schema、stub/DeepSeek 规划器、运动段危险区预检、技能前置检查、状态机、调用/仿真步预算和追加式运行日志。M2 每物理步检查继续启用。
+- **配置：** `configs/m3_runtime.json` 冻结单次 LLM 请求、30 s 超时、256 输出 token、30000 episode 步、2 次技能调用、pick 10000 步、place 12000 步、0 次重试/重规划、20 mm 危险区边距及 50 mm 末端/负载预检包络。M3 指令别名与 `configs/m3_cases.json` 中 20 个验收案例冻结。
+- **M2 重构回归：** `results/m3/m2_refactor_run1/`、`m2_refactor_run2/` 均 10/10。逐个场景比较原 `results/m2/acceptance_danger_zone_body_pair/` 的状态、步数、危险区最小距离和最终方块位置，全部精确一致。
+- **M3 stub 集成：** `results/m3/stub_batch/` 为 20/20，绿色/A 与蓝色/B 各 10 个指令，覆盖中文编号别名与英文颜色别名；所有成功均完成一次 `pick`、一次 `place` 并满足同一独立后置条件。
+- **真实模型评测：** 提示词 v2 的 `results/m3/llm_batch_v2/` 共 20/20 成功，20 次独立 DeepSeek `deepseek-flash` 请求，A/B 各 10 条；总用量 14536 tokens（每条 725–729），单次执行 14753–18331 个仿真步，逐条目标与人工标注相符。可视单次结果另见 `llm_visible_a_v2/` 和 `llm_visible_b/`，A/B 均成功。
+- **首次契约失败及修正：** `results/m3/llm_visible_a/` 的第一次真实输出带有额外顶层 `type` 字段；`INVALID_PLAN` 在技能调用前阻断，仿真仅做 1000 步场景静置。保留完整错误、响应、token 和轨迹记录；严格 schema 未放宽，提示词升级为 `m3-pick-place-json-v2`，给出精确对象样例并禁止格式元数据。之后 A/B 可视任务和冻结 20 条全通过。
+- **负例与回归测试：** `tests/test_m3_runtime.py` 共 9 项通过：20 个目标解析、歧义/不支持指令、额外/乱序/重复键/过期/目标不符计划、穿越危险区的路径拒绝、非法计划零技能执行、LLM 超时/鉴权/限流/空响应/截断响应的有界终止、未持物时阻止放置、技能步数预算强制停止。命令为 `.\\.venv\\Scripts\\python.exe -m unittest discover -s tests -v`。
+- **Viewer 观察限制：** 两条单次真实模型运行均未传 `--headless`，Windows MuJoCo 主窗口进程确实启动；代码使用正在步进的同一 `Episode.model/data`，完成后保持窗口并在关闭请求后正常退出。但当时桌面处于 Windows 锁屏，系统截图只捕获锁屏背景，未独立核对 MuJoCo 窗口像素。记录的是 Viewer 进程/生命周期通过、画面内容人工观察未确认；解锁后可用 README 命令再次观看。
+- **能力限制：** 当前目标解析只覆盖冻结的中文 A/B 与英文 green/blue 短指令；Agent 读取仿真真值，无视觉。无恢复、扰动下检测精度、真实硬件或 Sim2Real 结论；继续由 M4/M5 阶段处理。

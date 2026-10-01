@@ -1,0 +1,167 @@
+{
+  "date": "2026-09-28",
+  "phase": "M1",
+  "mujoco_version": "3.14.0",
+  "menagerie_package_version": "2026.9.2",
+  "menagerie_repository_commit": "c96a32d28fb5da84da38c1da4d749e7a13212855",
+  "menagerie_model_oid": "3d2262eeb81ecec19abfa31dd509e35abbb33e67",
+  "license": "Apache-2.0",
+  "upstream_panda_xml_sha256": "96ad67da03710f17f798c9478fd9e9efdf24a3bf8359f05e456dd9fb158ea273",
+  "project_panda_mocap_xml_sha256": "9de3cd81e1c3ee3e5374257a66e0356f2cac8b2b5ab2667621c51f99eb73d2c8",
+  "scene_xml": "assets/scene/panda_task.xml",
+  "world_frame": {
+    "origin": "MuJoCo world origin at the Panda base frame",
+    "vertical_axis": "+Z",
+    "length_unit": "m",
+    "angle_unit": "rad",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ]
+  },
+  "home": {
+    "keyframe_qpos": [
+      0.0,
+      0.0,
+      0.0,
+      -1.57079,
+      0.0,
+      1.57079,
+      -0.7853,
+      0.04,
+      0.04,
+      0.42,
+      -0.27,
+      0.425,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "arm_qpos": [
+      0.0,
+      0.0,
+      0.0,
+      -1.57079,
+      0.0,
+      1.57079,
+      -0.7853
+    ],
+    "ee_site_name": "ee_site",
+    "ee_site_local_pos_in_hand_m": [
+      0.0,
+      0.0,
+      0.1034
+    ],
+    "ee_site_local_quat_in_hand_wxyz": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "ee_site_world_pos_m": [
+      0.5544994780317354,
+      -5.186760451828153e-33,
+      0.5211024294875892
+    ],
+    "ee_site_world_quat_wxyz": [
+      1.110168512270546e-16,
+      0.7071414986822362,
+      0.7070720619862169,
+      1.1102775343033215e-16
+    ],
+    "hand_body_id": 9,
+    "panda_base_body": "link0",
+    "panda_base_body_pos_m": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "actuators": {
+    "arm_names": [
+      "actuator1",
+      "actuator2",
+      "actuator3",
+      "actuator4",
+      "actuator5",
+      "actuator6",
+      "actuator7"
+    ],
+    "arm_groups": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "gripper_name": "actuator8",
+    "gripper_group": 1,
+    "gripper_ctrlrange": [
+      0.0,
+      255.0
+    ],
+    "disabled_actuator_group_mask": 1
+  },
+  "scene": {
+    "table_top_z_m": 0.4,
+    "cube_half_size_m": [
+      0.025,
+      0.025,
+      0.025
+    ],
+    "cube_final_position_m": [
+      0.42000000050541886,
+      -0.2700000012081123,
+      0.42492049380696595
+    ],
+    "cube_bottom_z_m": 0.3999204938069659,
+    "cube_linear_speed_m_s": 1.5391552070171385e-10,
+    "target_markers_collision_disabled": true,
+    "target_regions_world_centers_m": [
+      [
+        0.58,
+        -0.12,
+        0.401
+      ],
+      [
+        0.58,
+        0.12,
+        0.401
+      ]
+    ]
+  },
+  "results": {
+    "csv": "results/m1/danger_zone_smoke/tracking.csv",
+    "screenshot": "results/m1/danger_zone_smoke/screenshots/panda_task.png",
+    "sample_count": 435,
+    "simulation_time_s": 8.699999999999575,
+    "tracking_dwell_max_error_m": {
+      "tracking_goal_1": 0.00013369337100970388,
+      "tracking_goal_2": 0.000130910416941459,
+      "tracking_goal_3": 0.00018593945692946696,
+      "return_home": 0.00018832275603184237
+    },
+    "tracking_limit_m": 0.02,
+    "model_gate_pass": true,
+    "tracking_gate_pass": true,
+    "gripper_closed_mean_joint_qpos_m": 0.001348272775226027,
+    "gripper_open_mean_joint_qpos_m": 0.03866356961697275,
+    "gripper_span_m": 0.037315296841746726,
+    "ee_max_drift_during_gripper_m": 0.00018831623196133228,
+    "gripper_gate_pass": true,
+    "scene_idle_gate_pass": true,
+    "warnings": {},
+    "contact_pair_min_distance_m": {
+      "cube_geom@cube <-> table_top@table": -7.950620158069343e-05
+    },
+    "minimum_contact_distance_m": -7.950620158069343e-05,
+    "penetration_limit_m": 0.005,
+    "penetration_gate_pass": true,
+    "non_finite_state_seen": false,
+    "overall_pass": true
+  }
+}

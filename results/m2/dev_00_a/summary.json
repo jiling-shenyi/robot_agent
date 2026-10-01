@@ -1,0 +1,107 @@
+{
+  "run_id": "20260927T104017Z",
+  "date_utc": "2026-09-27T10:40:18.751899+00:00",
+  "phase": "M2",
+  "mujoco_version": "3.14.0",
+  "numpy_version": "2.5.3",
+  "scene_xml": "assets/scene/panda_task.xml",
+  "scene_xml_sha256": "44f9ac4e7fa62d4130c9c163bb31e7a13424f48b0bcfb18aa66204558bd972bd",
+  "panda_mocap_xml_sha256": "9de3cd81e1c3ee3e5374257a66e0356f2cac8b2b5ab2667621c51f99eb73d2c8",
+  "scenario_config": "configs/m2_scenarios.json",
+  "scenario_config_sha256": "c003c48710ca58f2fbe4c8d41822d31d4a2b909866566d35ff7f86656d7a0a36",
+  "threshold_config": "configs/m2_thresholds.json",
+  "threshold_config_sha256": "4aa4b2b7ba44001a52d5e2c9b30f1981c6a5b55cb64cc10986814f39b660ec83",
+  "scenario_count": 1,
+  "success_count": 0,
+  "failure_count": 1,
+  "all_pass": false,
+  "episodes": [
+    {
+      "scenario_id": "m2_pose_00_a",
+      "seed": 0,
+      "target": "a",
+      "status": "FAILED",
+      "error_code": "OBJECT_DROPPED",
+      "step_count": 4145,
+      "max_ee_position_error_m": 0.004010613965044121,
+      "minimum_contact_distance_m": -0.0016553982992986108,
+      "stable_steps_observed": 0,
+      "postconditions": {
+        "gripper_open": false,
+        "no_gripper_contact": false,
+        "table_supported": false,
+        "bottom_height_within_tolerance": false,
+        "full_projected_footprint_inside_target_with_margin": false,
+        "linear_speed_below_limit": false,
+        "angular_speed_below_limit": false,
+        "warnings_absent": true,
+        "finite_state": true,
+        "cube_position_m": [
+          0.3997978361303504,
+          -0.2872064631163625,
+          0.4301066328190293
+        ],
+        "cube_bottom_z_m": 0.40455630985749474,
+        "table_top_z_m": 0.4,
+        "bottom_height_error_m": 0.0045563098574947225,
+        "cube_linear_speed_m_s": 0.03059609405383701,
+        "cube_angular_speed_rad_s": 0.10923821312951949,
+        "target_inset_lower_xy_m": [
+          0.5149999999999999,
+          -0.185
+        ],
+        "target_inset_upper_xy_m": [
+          0.645,
+          -0.05499999999999999
+        ],
+        "projected_cube_xy_min_m": [
+          0.37450352863406183,
+          -0.31267115958020897
+        ],
+        "projected_cube_xy_max_m": [
+          0.425092143626639,
+          -0.26174176665251603
+        ],
+        "finger_qpos_m": [
+          0.024910959097088188,
+          0.024911216022262803
+        ],
+        "gripper_contact": true,
+        "all_instantaneous_conditions": false
+      }
+    }
+  ],
+  "model_dimensions": {
+    "nbody": 15,
+    "ngeom": 86,
+    "nu": 8,
+    "neq": 2,
+    "timestep_s": 0.002
+  },
+  "thresholds": {
+    "schema_version": 1,
+    "status": "development_candidate",
+    "description": "Initial thresholds for M2 development. Freeze only after the contact and placement development runs pass.",
+    "motion_max_step_m": 0.0002,
+    "terminal_dwell_steps": 150,
+    "gripper_close_steps": 350,
+    "gripper_open_steps": 350,
+    "scene_settle_steps": 1000,
+    "placement_settle_max_steps": 1500,
+    "stable_steps": 250,
+    "max_episode_steps": 30000,
+    "ee_error_limit_m": 0.02,
+    "pregrasp_clearance_m": 0.1,
+    "lift_height_m": 0.12,
+    "minimum_lift_m": 0.08,
+    "place_clearance_m": 0.006,
+    "grasp_relative_drift_limit_m": 0.015,
+    "target_margin_m": 0.01,
+    "linear_speed_limit_m_s": 0.01,
+    "angular_speed_limit_rad_s": 0.1,
+    "table_support_tolerance_m": 0.003,
+    "penetration_limit_m": 0.005,
+    "finger_open_qpos_min_m": 0.03,
+    "finger_closed_contact_qpos_min_m": 0.01
+  }
+}

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "frozen",
-  "description": "Frozen after the M2 development sweep: five measured start poses, each evaluated once for target A and once for target B. Start poses are clear of both target regions.",
+  "description": "Frozen after the M2 development sweep: five measured start poses, each evaluated once for target A and once for target B. Start poses are clear of both target regions and the danger zone.",
   "scenarios": [
     {"scenario_id": "m2_pose_00_a", "seed": 0, "target": "a", "cube_position_m": [0.400, -0.290, 0.425]},
     {"scenario_id": "m2_pose_00_b", "seed": 0, "target": "b", "cube_position_m": [0.400, -0.290, 0.425]},
