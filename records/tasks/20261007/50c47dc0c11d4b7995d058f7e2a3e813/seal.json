@@ -1,0 +1,10 @@
+{
+  "event_count": 25,
+  "journal_sha256": "eb82ae71bcdbf3b38f4aa44cb37f04c7a3674a945ea6a37c4b06ce898c68ae5d",
+  "last_event_hash": "340dbe3cd3b05a9a0933c4834f73bbac0df368796ad4c58bfd182bf6d1636d65",
+  "manifest_sha256": "22aee3859ff12251de6462b594b871d1dd36b5350a8d5d8f6af475b9b4e73b46",
+  "projection_sha256": "6c23b3c33c6dafb710b06c28128e0477b737db58f51279f6cdd5d8c0d31d12f0",
+  "schema_version": 2,
+  "sealed_at": "2026-10-07T18:31:54.925813+08:00",
+  "task_id": "50c47dc0c11d4b7995d058f7e2a3e813"
+}

@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "actions": [
+    {"skill": "navigate", "target": "tea_table"},
+    {"skill": "pick", "object_id": "remote"},
+    {"skill": "carry", "target": "dining_clear"},
+    {"skill": "place", "support_id": "dining_table", "target_xy": [1.15, 0.43]}
+  ]
+}

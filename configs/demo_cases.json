@@ -1,0 +1,363 @@
+{
+  "schema_version": 1,
+  "description": "Unified Demo cases: retain twenty M3 cases, five original map cases, and nine home robot cases.",
+  "include_m3_cases": true,
+  "cases": [
+    {
+      "case_id": "alternate_to_a",
+      "name": "变体地图：放到 A 区",
+      "map_id": "alternate",
+      "agent": "robot",
+      "instruction": "把方块放到 A 区。",
+      "expected": {
+        "status": "SUCCESS",
+        "target_id": "target_a"
+      }
+    },
+    {
+      "case_id": "alternate_to_b",
+      "name": "变体地图：放到 B 区",
+      "map_id": "alternate",
+      "agent": "robot",
+      "instruction": "把方块放到 B 区。",
+      "expected": {
+        "status": "SUCCESS",
+        "target_id": "target_b"
+      }
+    },
+    {
+      "case_id": "environment_cube_position",
+      "name": "保存方块初始位置",
+      "map_id": "classic",
+      "agent": "environment",
+      "instruction": "将方块初始位置调整到 (0.43, -0.27, 0.425)",
+      "expected": {
+        "status": "SUCCESS",
+        "map_contains": {
+          "cube_position_m": [
+            0.43,
+            -0.27,
+            0.425
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "environment_danger_size",
+      "name": "保存危险区尺寸",
+      "map_id": "classic",
+      "agent": "environment",
+      "instruction": "将危险区半尺寸设为 (0.09, 0.07, 0.11)",
+      "expected": {
+        "status": "SUCCESS",
+        "map_contains": {
+          "danger_zone": {
+            "half_size_m": [
+              0.09,
+              0.07,
+              0.11
+            ]
+          }
+        }
+      }
+    },
+    {
+      "case_id": "environment_then_m3",
+      "name": "修改地图后执行机器人指令",
+      "map_id": "alternate",
+      "steps": [
+        {
+          "agent": "environment",
+          "instruction": "将方块初始位置调整到 (0.43, -0.27, 0.425)",
+          "expected": {
+            "status": "SUCCESS",
+            "map_contains": {
+              "cube_position_m": [
+                0.43,
+                -0.27,
+                0.425
+              ]
+            }
+          }
+        },
+        {
+          "agent": "robot",
+          "instruction": "把方块放到 A 区。",
+          "expected": {
+            "status": "SUCCESS",
+            "target_id": "target_a"
+          }
+        }
+      ]
+    },
+    {
+      "case_id": "home_remote_to_table",
+      "name": "遥控器送到餐桌",
+      "map_id": "home_living_room",
+      "agent": "robot",
+      "instruction": "遥控器送到餐桌",
+      "robot_plan": {
+        "schema_version": 1,
+        "actions": [
+          {
+            "skill": "observe"
+          },
+          {
+            "skill": "navigate",
+            "target": "tea_table"
+          },
+          {
+            "skill": "inspect",
+            "object_id": "remote"
+          },
+          {
+            "skill": "pick",
+            "object_id": "remote"
+          },
+          {
+            "skill": "carry",
+            "target": "dining_clear"
+          },
+          {
+            "skill": "stop"
+          },
+          {
+            "skill": "wait",
+            "seconds": 0.3
+          },
+          {
+            "skill": "place",
+            "support_id": "dining_table",
+            "target_xy": [
+              1.15,
+              0.43
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "status": "SUCCESS",
+        "transport_success": true
+      }
+    },
+    {
+      "case_id": "home_book_to_tea",
+      "name": "把书搬到茶几",
+      "map_id": "home_living_room",
+      "agent": "robot",
+      "instruction": "把书搬到茶几",
+      "robot_plan": {
+        "schema_version": 1,
+        "actions": [
+          {
+            "skill": "observe"
+          },
+          {
+            "skill": "navigate",
+            "target": "dining_table"
+          },
+          {
+            "skill": "inspect",
+            "object_id": "book"
+          },
+          {
+            "skill": "pick",
+            "object_id": "book"
+          },
+          {
+            "skill": "carry",
+            "target": "tea_clear"
+          },
+          {
+            "skill": "stop"
+          },
+          {
+            "skill": "wait",
+            "seconds": 0.3
+          },
+          {
+            "skill": "place",
+            "support_id": "tea_table",
+            "target_xy": [
+              -0.65,
+              0.43
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "status": "SUCCESS",
+        "transport_success": true
+      }
+    },
+    {
+      "case_id": "home_cup_to_table",
+      "name": "杯子送到餐桌",
+      "map_id": "home_living_room",
+      "agent": "robot",
+      "instruction": "杯子送到餐桌",
+      "robot_plan": {
+        "schema_version": 1,
+        "actions": [
+          {
+            "skill": "observe"
+          },
+          {
+            "skill": "navigate",
+            "target": "tea_cup"
+          },
+          {
+            "skill": "inspect",
+            "object_id": "cup"
+          },
+          {
+            "skill": "pick",
+            "object_id": "cup"
+          },
+          {
+            "skill": "carry",
+            "target": "dining_clear"
+          },
+          {
+            "skill": "stop"
+          },
+          {
+            "skill": "wait",
+            "seconds": 0.3
+          },
+          {
+            "skill": "place",
+            "support_id": "dining_table",
+            "target_xy": [
+              1.15,
+              0.43
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "status": "SUCCESS",
+        "transport_success": true
+      }
+    },
+    {
+      "case_id": "home_restricted_pick",
+      "name": "抓取药品",
+      "map_id": "home_living_room",
+      "agent": "robot",
+      "instruction": "抓取药品",
+      "expected": {
+        "status": "FAILED",
+        "error_code": "UNSUPPORTED_OPERATION",
+        "transport_success": false
+      },
+      "robot_plan": {
+        "schema_version": 1,
+        "actions": [
+          {
+            "skill": "pick",
+            "object_id": "medicine"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "home_hot_pick",
+      "name": "抓取热水壶",
+      "map_id": "home_living_room",
+      "agent": "robot",
+      "instruction": "抓取热水壶",
+      "expected": {
+        "status": "FAILED",
+        "error_code": "UNSUPPORTED_OPERATION",
+        "transport_success": false
+      },
+      "robot_plan": {
+        "schema_version": 1,
+        "actions": [
+          {
+            "skill": "pick",
+            "object_id": "kettle"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "home_empty_carry",
+      "name": "空手携物到餐桌",
+      "map_id": "home_living_room",
+      "agent": "robot",
+      "instruction": "空手携物到餐桌",
+      "expected": {
+        "status": "FAILED",
+        "error_code": "HOLD_PRECONDITION",
+        "transport_success": false
+      },
+      "robot_plan": {
+        "schema_version": 1,
+        "actions": [
+          {
+            "skill": "carry",
+            "target": "dining_table"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "home_unregistered_tool",
+      "name": "切换水壶开关",
+      "map_id": "home_living_room",
+      "agent": "robot",
+      "instruction": "切换水壶开关",
+      "expected": {
+        "status": "FAILED",
+        "error_code": "UNREGISTERED_SKILL",
+        "transport_success": false
+      }
+    },
+    {
+      "case_id": "home_navigation_collision",
+      "name": "真实底盘导航碰撞守卫",
+      "map_id": "home_living_room",
+      "agent": "robot",
+      "instruction": "导航到茶几",
+      "robot_plan": {
+        "schema_version": 1,
+        "actions": [
+          {
+            "skill": "navigate",
+            "target": "tea_table"
+          }
+        ]
+      },
+      "test_fault_protocol": "navigation_waypoint_into_tea_table_v1",
+      "expected": {
+        "status": "FAILED",
+        "error_code": "ROBOT_FURNITURE_COLLISION",
+        "transport_success": false
+      }
+    },
+    {
+      "case_id": "home_room_only",
+      "name": "观察家居房间并停止",
+      "map_id": "home_living_room",
+      "agent": "robot",
+      "instruction": "观察房间并停止",
+      "robot_plan": {
+        "schema_version": 1,
+        "actions": [
+          {
+            "skill": "observe"
+          },
+          {
+            "skill": "stop"
+          }
+        ]
+      },
+      "expected": {
+        "status": "SUCCESS",
+        "transport_success": false
+      }
+    }
+  ]
+}

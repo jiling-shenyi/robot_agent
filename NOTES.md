@@ -2,6 +2,10 @@
 
 本文件记录项目范围、可复现基线、关键决策和实验结果。计划、环境查询与仿真结果分开记录；没有运行或观察到的内容不标记为通过。后续实验按“日期与阶段、环境/模型、目标与配置、观察结果、验收门槛、失败信息、下一步、关联文件/提交”追加。
 
+**2026-10-07 历史产物清理说明：** 下方历史章节的测试数字、失败原因和物理/可视验收结论保持原意；旧路径与“保留”描述对应当时版本。记录 v2 整理已按用户授权删除旧 Agent 主记录及 `results/demo`、`results/home`、`results/geometry`、`results/m3` 下的旧执行详情、摘要和截图，删除清单共676件；M1/M2留存文件的哈希核对未改变。失效旧产物链接已移除，历史执行分析和验证日志继续留存。清理范围及结果见[清理结果](../task-records/20261007-181011-unified-training-records/cleanup-result.json)和[本次执行分析](../task-records/20261007-181011-unified-training-records/analysis.md)。当前唯一记录主根、摘要引用与查询规则以 [TASK_RECORDS.md](TASK_RECORDS.md) 为准。
+
+**同步至 2026-10-04：** M0–M3 历史保留；通用 Demo、两幅桌面地图、环境编辑、自然语言修复与 A0 整理见下方追加记录。早期记录中的 `planner.py`、`runtime.py` 等为当时路径，当前源码入口以 [MODULES.md](MODULES.md) 为准。本次同步核对现有源码、配置和留存证据，没有重新运行仿真、GUI 或模型请求。
+
 ## 决策记录
 
 ### D-001：锁定第一版任务边界与仿真验收基准
@@ -110,7 +114,93 @@
 - **M2 重构回归：** `results/m3/m2_refactor_run1/`、`m2_refactor_run2/` 均 10/10。逐个场景比较原 `results/m2/acceptance_danger_zone_body_pair/` 的状态、步数、危险区最小距离和最终方块位置，全部精确一致。
 - **M3 stub 集成：** `results/m3/stub_batch/` 为 20/20，绿色/A 与蓝色/B 各 10 个指令，覆盖中文编号别名与英文颜色别名；所有成功均完成一次 `pick`、一次 `place` 并满足同一独立后置条件。
 - **真实模型评测：** 提示词 v2 的 `results/m3/llm_batch_v2/` 共 20/20 成功，20 次独立 DeepSeek `deepseek-flash` 请求，A/B 各 10 条；总用量 14536 tokens（每条 725–729），单次执行 14753–18331 个仿真步，逐条目标与人工标注相符。可视单次结果另见 `llm_visible_a_v2/` 和 `llm_visible_b/`，A/B 均成功。
-- **首次契约失败及修正：** `results/m3/llm_visible_a/` 的第一次真实输出带有额外顶层 `type` 字段；`INVALID_PLAN` 在技能调用前阻断，仿真仅做 1000 步场景静置。保留完整错误、响应、token 和轨迹记录；严格 schema 未放宽，提示词升级为 `m3-pick-place-json-v2`，给出精确对象样例并禁止格式元数据。之后 A/B 可视任务和冻结 20 条全通过。
+- **首次契约失败及修正：** 原 `results/m3/llm_visible_a/` 的第一次真实输出带有额外顶层 `type` 字段；`INVALID_PLAN` 在技能调用前阻断，仿真仅做 1000 步场景静置。当时保存了完整错误、响应、token 和轨迹记录，这些旧产物现已在 v2 整理中清理；失败结论保留。严格 schema 未放宽，提示词升级为 `m3-pick-place-json-v2`，给出精确对象样例并禁止格式元数据。之后 A/B 可视任务和冻结 20 条全通过。
 - **负例与回归测试：** `tests/test_m3_runtime.py` 共 9 项通过：20 个目标解析、歧义/不支持指令、额外/乱序/重复键/过期/目标不符计划、穿越危险区的路径拒绝、非法计划零技能执行、LLM 超时/鉴权/限流/空响应/截断响应的有界终止、未持物时阻止放置、技能步数预算强制停止。命令为 `.\\.venv\\Scripts\\python.exe -m unittest discover -s tests -v`。
 - **Viewer 观察限制：** 两条单次真实模型运行均未传 `--headless`，Windows MuJoCo 主窗口进程确实启动；代码使用正在步进的同一 `Episode.model/data`，完成后保持窗口并在关闭请求后正常退出。但当时桌面处于 Windows 锁屏，系统截图只捕获锁屏背景，未独立核对 MuJoCo 窗口像素。记录的是 Viewer 进程/生命周期通过、画面内容人工观察未确认；解锁后可用 README 命令再次观看。
 - **能力限制：** 当前目标解析只覆盖冻结的中文 A/B 与英文 green/blue 短指令；Agent 读取仿真真值，无视觉。无恢复、扰动下检测精度、真实硬件或 Sim2Real 结论；继续由 M4/M5 阶段处理。
+
+## 通用 Demo、地图与后续整理记录
+
+### D-005：地图持久化与通用 Demo 会话
+
+- **日期 / 阶段：** 2026-10-01 / M3 后续测试台；已实现。
+- **决策：** 使用独立 JSON 地图保存初始环境，复用已有 Panda 模型、M3 技能和逐步安全守卫；统一自由指令、环境编辑和批量用例入口，不为演示改变物理成功判据。地图不是静态截图，加载后直接应用到实际执行的 `MjModel` / `MjData`。
+- **地图基线：** `schema_version=1`，本次核对两图均为 `revision=1`；Z 轴向上、长度用米，位置指物体中心，`half_size_m` 为半尺寸。桌面顶面 `z=0.4`，边长 `0.05` 的方块初始中心 `z=0.425`。
+
+| 地图 | 方块初始中心（m） | 危险区中心（m） | 危险区半尺寸（m） |
+| --- | --- | --- | --- |
+| [classic：经典桌面](configs/maps/classic.json) | `(0.40, -0.29, 0.425)` | `(0.82, 0.28, 0.535)` | `(0.06, 0.06, 0.135)` |
+| [alternate：变体桌面](configs/maps/alternate.json) | `(0.42, -0.25, 0.425)` | `(0.83, 0.28, 0.535)` | `(0.055, 0.06, 0.135)` |
+
+- **共同目标区：** A（绿色）中心 `(0.58, -0.12, 0.401)`，B（蓝色）中心 `(0.58, 0.12, 0.401)`；半尺寸均为 `(0.075, 0.075, 0.001)`。变体改变方块起点、危险区位置与尺寸，保留 A/B 以复用冻结技能和用例。
+- **存储约束：** 严格 schema、有限数值与桌面支撑/边界检查；整次编辑统一校验，通过后在写锁内检查预期版本、原子保存并增加 revision。非法多操作或写入失败不部分提交；过期版本返回 `REVISION_CONFLICT`。源地图合法不保证机器人路径可达或安全，动作仍由原守卫独立判断。
+- **会话约定：** 自由模式连续指令保留当前物理状态；选择地图或重置才恢复最新保存的初始环境。重置不撤销已保存编辑。批量复制地图到输出目录，逐例恢复批次起始快照；同一用例的多步操作共享状态。
+- **当前实现：** `src/embodied_agent/maps/schema.py`、`maps/store.py`、`maps/scene.py`、`apps/demo/session.py`。设计与首次验收见[地图与 Demo 执行分析](../task-records/20261001-185104-world-maps-demo/analysis.md)。
+
+### Demo：统一可视自由测试与批量评测
+
+- **日期 / 阶段：** 2026-10-01 完成，2026-10-02 补充 README；2026-10-04 整理后回归通过。
+- **界面与物理执行：** `scripts/demo.py` 默认进入 Tk 单窗口自由模式；先选择并加载地图，再显示真实 MuJoCo Renderer 场景。提供世界 X/Y/Z 轴、米制刻度与桌面网格、旋转/缩放/恢复视角、机器人和环境双输入区、重置，以及右上角用例选择/执行。物理步进与绘制在主线程串行执行，语言请求后台等待；执行期间禁用冲突操作，终态保持可见。
+- **当前入口与接口：** CLI 在 `src/embodied_agent/apps/demo/cli.py`；`DemoSession` 提供地图选择、重置、Agent 执行、环境编辑、用例执行和结果收尾。`session.register_agent()` / `app.register_agent()` 可接入后续适配器；当前内置 M3 与环境 Agent。
+- **用例与输出：** 当时的 [configs/demo_cases.json](configs/demo_cases.json) 包含原 M3 的 20 条用例及 5 条变体地图/环境用例，共 25 条。支持单步、多步和独立 `expected` 校验；旧结果格式包含 `manifest.json`、`actions.jsonl`、`cases.jsonl`、`summary.json` 及机器人 `episodes.jsonl`、`events.jsonl`、`trajectory.csv`。这些旧产物现已在 v2 整理中清理；当前 `results/demo/<时间戳>/` 只写 manifest、摘要与任务引用，批量地图副本仍保存，详细事实统一进入项目 `records/`。新报告目录仍拒绝覆盖已有非空目录。
+- **中断与统计：** 窗口执行中关闭产生 `ABORTED/VIEWER_CLOSED`，余例记 `NOT_RUN`。`passed_count` 表示符合预期的用例数，`success_count` 表示实际结果成功数；预期安全拒绝只计入前者。全部符合预期退出 0，失败、中断或配置错误退出非零。
+
+在 `robot_agent` 目录首选可视自由模式；默认机器人和环境规划均读取项目 `.env` 调用 DeepSeek：
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\demo.py --mode free
+```
+
+离线可视开发与可视批量：
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\demo.py --mode free --planner stub --environment-planner rules
+.\.venv\Scripts\python.exe .\scripts\demo.py --mode batch --viewer --planner stub --environment-planner rules
+```
+
+专门的自动化批量评测可使用无界面模式；批量默认无窗口，自由模式拒绝 `--headless`：
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\demo.py --mode batch --headless --planner stub --environment-planner rules
+```
+
+- **验收证据：** 2026-10-01 默认批量为 25/25 符合预期，实际成功 25；当时的 `language_fix_default_batch_20261001` 汇总已在 v2 整理中清理。2026-10-04 移除旧兼容入口后的完整批量仍为 25/25，实际成功 25，见[当次 Demo 汇总](../task-records/20261004-190613-remove-src-compat/validation/demo-batch/summary.json)。图形测试验证选图、编辑、重置、真实 M3 动作、窗口关闭中断；当次 2/2 通过，见[GUI 回归日志](../task-records/20261004-190613-remove-src-compat/validation/gui-tests.stderr.txt)。
+- **问题与解决：** Windows 中文路径的 XML 加载改为受锁保护的相对路径加载；批量前例污染后例改为私有地图与逐例基线恢复；显示与存储不一致增加版本/快照检查；保存后刷新失败仍保留 `persisted`、before/after 和 `refresh_error`；关闭窗口统一保留中断和未执行证据。对应地图、事务、会话和 GUI 回归已通过。
+- **边界与下一步：** stub/rules 仅用于有限离线解析，机器人动作仍运行真实 MuJoCo 物理。测试台扩展接口已完成，后续 Agent 必须实现自己的契约、安全检查和成功判据；不据此宣称 M4/M5 或家居场景已完成。使用说明见 [DEMO.md](DEMO.md) 和 [README.md](README.md)。
+
+### Demo 后续：模型优先的机器人语义与环境相对编辑
+
+- **日期 / 阶段：** 2026-10-01 / 用户报告问题修复完成。
+- **机器人链路：** Demo 的 llm 模式先让 DeepSeek 解释原始指令，输出受限对象/动作/目标，再由 M3 规划器生成 pick/place 技能计划；不再在模型请求前用固定 A/B 动词别名过滤。语义响应、请求次数、模型与用量进入执行证据。原 `scripts/m3_agent.py` 冻结解析/评测语义保留。
+- **安全语义：** “把方块放到危险区”经语义解释后由独立契约返回 `FAILED/UNSAFE_TARGET`，不启动抓放；不能重定向为 A/B 来声称成功。物理动作仍限于单方块到 A/B。
+- **环境编辑：** `agents/environment.py` 将自然语言转为受限 `set_position`、`set_half_size`、`scale`、`shift_axis` 操作；只修改方块初始位置和已知区域位置/尺寸。支持米/厘米/毫米、完整尺寸转半尺寸、明确比例缩放、x/y/z 相对移动；“调高一点/调低一点”固定为对应坐标 ±0.01 米，仍需通过完整地图校验。相对加法使用十进制处理，避免保存冗长的浮点尾数。
+- **用例后编辑修正：** 临时起点覆盖保留原存储地图快照，随后编辑以存储地图为基准；成功保存并重置显示时记录 `auto_reset_from_case: true`。外部真实版本更改仍拒绝覆盖。
+- **针对性验收：** [demo_language_cases.json](configs/demo_language_cases.json) 共 4 条。当时真实模型批量为 4/4 符合预期，其中实际成功 3（1 条机器人动作、2 条环境编辑），安全拒绝 1；原汇总已在 v2 整理中清理。“请将小方块搬运至天蓝色目的地”实际放到 B 区，2 次模型请求、18331 物理步；危险区指令 1 次语义请求、0 次技能规划、0 物理步。两条相对编辑分别保存 y=-0.28、x≈0.41；早期记录曾含修正前的浮点尾数，历史结果说明未改写。
+- **真实可视证据：** 当时的 `gui_smoke.json` 与编辑后截图记录 B 区成功、危险区零步安全拒绝、用例后 y 相对编辑及真实渲染；旧结果与截图已在 v2 整理中清理。详细问题、修复和当时结论见[执行分析](../task-records/20261001-211151-demo-agent-language-fix/analysis.md)。
+- **复现：** 自由模式输入上述指令；针对性批量使用 `--mode batch --planner llm --environment-planner llm --cases .\configs\demo_language_cases.json`，观察时加 `--viewer`。非固定话术用例需要真实模型，stub 不能验收同等语义能力。
+
+### Demo 后续：加载地图时的窗口缩放处理
+
+- **日期 / 阶段：** 2026-10-02 / 修复代码与静态检查完成。
+- **现象及处理：** 用户反馈加载地图后页面与文字一起缩小；最初恢复 Tk geometry/scaling 未解决。后续依据 GLFW 在 Windows 首次初始化时改变进程 DPI 感知的机制，在创建 `tk.Tk()` 前短暂创建、激活并释放 MuJoCo OpenGL context，使 GLFW 初始化先于 Tk；保留加载后的窗口状态/尺寸/缩放恢复。批量无界面路径不创建该上下文。
+- **验证边界：** 当时只完成语法与行尾检查，没有目标桌面视觉确认。2026-10-04 已有整体 Demo 图形回归 2/2 通过，但未单独记录该缩放现象的专项复测或用户确认，因此不把专项视觉问题标为已验收。当前实现位于 `visualization/demo_ui.py`，原调查见[窗口调整分析](../task-records/20261002-145739-demo-window-size/analysis.md)。
+
+### A0：已实现功能的模块整理与旧 src 入口移除
+
+- **日期 / 阶段：** 2026-10-04 / A0 完成，随后按用户要求删除旧 src 兼容文件。
+- **当前结构：** 应用位于 `apps/demo/`；地图、Agent、模型服务、执行、仿真、技能、安全、可视化、评估分别位于 `maps/`、`agents/`、`models/`、`execution/`、`simulation/`、`skills/`、`safety/`、`visualization/`、`evaluation/`。脚本保留启动命令并调用实际模块，src 顶层仅保留 `__init__.py`、`contracts.py`、`paths.py`；八个旧重导出文件已删除，源码和测试直接导入新实现。职责及公开接口见 [MODULES.md](MODULES.md)。
+- **基线与保护：** 当时整理前后源码、Git 状态和 hash 清单保存到任务目录；当次保留了资产、配置、地图、历史验收和唯一失败证据，仅对清单确认的空会话和重复图像校验归档后清理。旧 Agent 运行产物后来按用户授权在记录 v2 整理中删除，范围见顶部清理说明。manifest/summary 当时增加迁移后 `source_hashes`；相关变更当时在工作区，未提交或推送。
+- **最新验证：** 全套 66 项测试中 64 通过、2 项图形默认跳过；另启用真实桌面运行 2/2 通过，未把跳过计为通过。移除兼容文件后 50 个模块独立新进程导入通过、Demo 25/25、M3 20/20；见[最终汇总](../task-records/20261004-190613-remove-src-compat/validation/final-report.json)及[单元回归日志](../task-records/20261004-190613-remove-src-compat/validation/unit-tests.stderr.txt)。A0 还验证 M2 10/10、M1 诊断、原生 Viewer 正常控制链路触发危险区守卫，见 [A0 执行分析](../task-records/20261004-000502-robot-agent-a0/analysis.md)。
+- **能力边界与下一步：** A0 和入口移除回归均未重新调用真实模型 API；模型验证采用模拟 SDK/冻结行为对比，2026-10-01 真实模型证据当时单独保存，旧运行产物现已在 v2 整理中清理。当时后续计划按 [CAREER_ROADMAP_2026.md](CAREER_ROADMAP_2026.md) 推进 A1，本地模型部署、家居环境、完整 Hook/隔离预演、训练及对抗 Agent 属于该阶段后续计划。旧入口移除清单和历史结论见[执行分析](../task-records/20261004-190613-remove-src-compat/analysis.md)。
+
+### 任务级 JSON：统一请求记录
+
+- **日期 / 范围：** 2026-10-05，按用户要求完成任务级 JSON；统一 Hook、滚动预测和自动重规划继续搁置。
+- **新记录：** Demo、家居机器人和共享 M3 按每请求保存地图定义与哈希、真实前后观测、原始语言、规划输入/响应/指令集、实际技能及物理证据切片、真实反馈和来源/成本。采用 UUID 和上海日期＋地图简写＋记录根内全局日序号；关键边界原子落盘，完成后不随下一任务改写。
+- **输出与查询：** 当时默认 `records/tasks/`，显式 `--output` 使用其 `task_records/`；这是已退出使用的 v1 规则，旧主记录已在 v2 整理中清理。当前默认主根固定为项目 `records/`，`--records-dir` 可覆盖，`--output` 只决定 manifest、摘要和任务引用的报告位置，批量地图副本仍保留。无仿真/模型依赖的 `scripts/task_records.py` 查询已迁移到 v2，用法与契约见 [TASK_RECORDS.md](TASK_RECORDS.md)。
+- **验证与边界：** 核心并发/原子故障、执行事件、Demo/M3、模型边界、查询及真实桌面回归通过；保留 5 个真实执行任务样本，包含 Panda 14994 步成功放置与危险目标零步拒绝。观测不是完整可恢复 checkpoint；未接入 Hook 的 checks 和未实际送达 Agent 的反馈保持空。具体结果见[执行分析](../task-records/20261005-214709-task-json-records/analysis.md)和[样本验证](../task-records/20261005-214709-task-json-records/validation-results.json)。
+
+
+## 2026-10-07：清理旧指令Agent（已完成）
+
+删除 `agents/home_language.py`、`language.py`、`planning.py`、旧 `execution/runtime.py`，移除旧TaskGoal/固定两步计划及提示词、Session/UI兼容成员和m3注册。原生工具对话成为唯一LLM协议，旧启动脚本替换为 `scripts/instruction_agent.py`，运行配置整理为 `configs/agent_runtime.json`。二十个场景数据改走当前通用Agent。本文此前M3配置与入口记录为历史，不代表现状。相关有效物理/模型/记录测试迁移至当前接口。

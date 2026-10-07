@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "status": "active",
+  "description": "Shared instruction/environment agents, task budgets and physical safety limits.",
+  "components": {
+    "prompts": {"overrides": {}},
+    "tools": {
+      "query_names": ["observe", "query_world", "inspect", "get_capabilities"],
+      "descriptions": {}
+    },
+    "memory": {
+      "enabled": false,
+      "max_entries": 128,
+      "history_limit": 8,
+      "max_chars": 4000,
+      "record_completed_tasks": true
+    },
+    "knowledge": {
+      "enabled": false,
+      "version": "knowledge-v1",
+      "documents": [],
+      "top_k": 3,
+      "max_chars": 4000
+    }
+  },
+  "budgets": {
+    "planner_timeout_s": 30,
+    "max_episode_steps": 30000
+  },
+  "agent": {
+    "max_output_tokens": 4096,
+    "max_rounds": 8,
+    "max_tool_calls": 24,
+    "max_tool_result_chars": 65536,
+    "max_proposal_repairs": 2,
+    "interpret_goals_first": true
+  },
+  "task_budget": {
+    "max_requests": 24,
+    "max_tokens": 131072,
+    "max_actions": 128,
+    "max_replans": 4,
+    "timeout_s": 300
+  },
+  "execution": {
+    "max_decision_rounds": 8
+  },
+  "planner": {
+    "reasoning_effort": "low",
+    "thinking": "disabled"
+  },
+  "path_precheck": {
+    "danger_zone_clearance_m": 0.02,
+    "ee_payload_envelope_radius_m": 0.05,
+    "sample_spacing_m": 0.01
+  }
+}

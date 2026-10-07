@@ -1,5 +1,11 @@
 # 第三方模型来源
 
+## Hello Robot Stretch 2
+
+- 来源：[锁定MuJoCo Menagerie模型](https://github.com/google-deepmind/mujoco_menagerie/tree/c96a32d28fb5da84da38c1da4d749e7a13212855/hello_robot_stretch)。包版本 `2026.9.2`，条目 OID `d37c1fc83fc259f0681856608f3c59df66ce7c1d`。
+- 原始MJCF/mesh/纹理保持原样，项目副本位于 `hello_robot_stretch/`；许可证为该目录内的 `LICENSE`（BSD-3-Clause-Clear）。
+- 版本和哈希见 [MODEL_PROVENANCE.json](hello_robot_stretch/MODEL_PROVENANCE.json)，运行时坐标/控制/碰撞适配见 [PROJECT_ADAPTATION.md](hello_robot_stretch/PROJECT_ADAPTATION.md)。
+
 ## Franka Emika Panda
 
 - **来源：** [MuJoCo Menagerie `franka_emika_panda`](https://github.com/google-deepmind/mujoco_menagerie/tree/main/franka_emika_panda)

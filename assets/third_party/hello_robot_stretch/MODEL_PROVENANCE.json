@@ -1,0 +1,24 @@
+{
+  "model": "Hello Robot Stretch 2",
+  "source": "https://github.com/google-deepmind/mujoco_menagerie/tree/c96a32d28fb5da84da38c1da4d749e7a13212855/hello_robot_stretch",
+  "menagerie_package_version": "2026.9.2",
+  "menagerie_commit": "c96a32d28fb5da84da38c1da4d749e7a13212855",
+  "robot_tree_oid": "d37c1fc83fc259f0681856608f3c59df66ce7c1d",
+  "archive": "hello_robot_stretch-d37c1fc83fc259f0.tar.xz",
+  "archive_sha256": "b8776d625d7137eb71e723db18c73b35e897f071d2b9dea43103de9b0454abe4",
+  "stretch_xml_sha256": "4f33408242b90acbe4ca0f4b544ca5efae4f423c92ef71358f0977ec0b03a316",
+  "license": "BSD-3-Clause-Clear",
+  "license_sha256": "bcc1dc8fcec14cbef3dc8f10b6f6d2fd2d81c0fb5c0e3657e43e34d3d38f9072",
+  "local_asset_directory": "hello_robot_stretch",
+  "asset_changes": "Original MJCF, meshes, textures and LICENSE copied without modification. Runtime adapter assigns otherwise unnamed geoms explicit registry names, sets timestep to 0.002 s and resolves assets relative to the vendored directory. No robot-furniture contact exclusions or object welds are added.",
+  "actuators": {
+    "forward": {"type": "tendon_motor", "range": [-1, 1], "gear": 3, "positive_effect": "negative base x velocity"},
+    "turn": {"type": "tendon_motor", "range": [-1, 1], "gear": 3, "positive_effect": "negative world yaw velocity"},
+    "lift": {"type": "position_general", "unit": "m displacement", "range": [-0.5, 0.6]},
+    "arm_extend": {"type": "position_tendon_general", "unit": "m total telescope extension", "range": [0, 0.52]},
+    "wrist_yaw": {"type": "position_general", "unit": "rad", "range": [-1.75, 4]},
+    "grip": {"type": "position_general", "unit": "m finger slider", "range": [-0.005, 0.04]},
+    "head_pan": {"type": "position", "unit": "rad", "range": [-3.9, 1.5]},
+    "head_tilt": {"type": "position", "unit": "rad", "range": [-1.53, 0.79]}
+  }
+}

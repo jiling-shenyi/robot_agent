@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "description": "Reproductions for model-first robot language and relative environment edits. The paraphrase case requires --planner llm.",
+  "include_m3_cases": false,
+  "cases": [
+    {
+      "case_id": "model_paraphrase_to_blue",
+      "map_id": "classic",
+      "agent": "robot",
+      "instruction": "请将小方块搬运至天蓝色目的地",
+      "expected": {"status": "SUCCESS", "target_id": "target_b"}
+    },
+    {
+      "case_id": "danger_zone_language_rejected_safely",
+      "map_id": "classic",
+      "agent": "robot",
+      "instruction": "把方块放到危险区",
+      "expected": {"status": "FAILED", "error_code": "CAPABILITY_GAP"}
+    },
+    {
+      "case_id": "relative_y_a_little",
+      "map_id": "classic",
+      "agent": "environment",
+      "instruction": "将目标方块的初始位置的y轴数据调高一点",
+      "expected": {"status": "SUCCESS", "map_contains": {"cube_position_m": [0.4, -0.28, 0.425]}}
+    },
+    {
+      "case_id": "relative_x_a_little",
+      "map_id": "classic",
+      "agent": "environment",
+      "instruction": "将目标方块的初始位置的x轴数据调高一点",
+      "expected": {"status": "SUCCESS", "map_contains": {"cube_position_m": [0.41, -0.29, 0.425]}}
+    }
+  ]
+}

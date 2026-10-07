@@ -1,6 +1,62 @@
 # Robot Agent
 
-MuJoCo 机器人操作 Agent 项目。问题定义、选型理由与工作原理见 [技术方案文档](TECHNICAL_DESIGN.md)，整体阶段安排见 [PROJECT_PLAN.md](PROJECT_PLAN.md)，M0/M1 执行规划见 [M0_M1_实施规划.md](M0_M1_实施规划.md)，M3 Agent 闭环实施计划见 [M3_实施计划.md](M3_实施计划.md)（已完成，限制见阶段记录）。
+已按路线图 A0 整理现有模块，并删除 src 中的旧兼容文件；代码直接使用拆分后的模块路径。脚本启动命令、模块职责、依赖方向及运行产物规则见[模块说明](MODULES.md)。
+
+P0、P1、P2 改造后的实际架构见[自然语言任务执行链路与指令 Agent 原理](自然语言任务执行链路.md)。Panda/Stretch 使用同一个 InstructionAgent：模型先确认目标和方法，再规划动作段；只读查询通过原生工具回传，真实执行的反馈可触发继续规划。等待模型时保持物理监督，每个动作实时审查并独立验收。已支持几何生成操作姿态、地板/沙发座面/新平台、动态区域和受阻绕行；实际能力仍受机器人几何、权限与守卫约束。
+
+提示词、查询工具、记忆和知识库已拆为独立的 `prompts/`、`tools/`、`memory/`、`knowledge/` 包，可通过 `components` 配置和 Agent/DemoSession 构造参数替换。默认记忆/知识禁用；启用后按角色隔离保存真实结果摘要，知识检索使用本地词面匹配。两个 Agent 共用 v2 事件/工件记录、独立评价和六种数据导出；奖励须明确选择，强化学习训练器尚未接入。配置和注入见 [Agent 组件说明](AGENT_COMPONENTS.md)，记录与训练资格见 [TASK_RECORDS.md](TASK_RECORDS.md)。
+
+## 家居地图与移动机器人（第4、5步 / A2、A3）
+
+原 Demo 已升级为家居机器人：默认 `home_living_room` 选择 Hello Robot Stretch 2，`classic` / `alternate` 选择原 Panda 适配器。地图、自由指令、环境编辑、重置、用例、批量和结果共用原 `DemoSession` / `DemoApp`，独立家居入口、会话和 Viewer 已移除。首版限定0.6 m桌面、50 mm盒状物品和验证过的侧向抓取姿态。
+
+启动原可视 Demo，默认加载家居地图：
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\demo.py --mode free
+```
+
+输入“把遥控器送到餐桌”“把书搬到茶几”或“把杯子送到餐桌”，也可在原用例下拉框运行家居用例。WorldView 同步真实物理执行，完成或失败后保留终态直到关闭。连续指令、规则拒绝、真实控制碰撞故障及能力边界见 [HOME_ROBOT.md](HOME_ROBOT.md)。完整 Hook、预演和训练仍在后续阶段。
+
+## 通用模拟世界 Demo（M3 及后续阶段）
+
+[`scripts/demo.py`](scripts/demo.py) 是机器人及原 M3 机械臂共用的自由测试与批量测试入口。默认可视化，专用自动化批量使用显式 `--headless`。Demo 使用 MuJoCo 实际仿真状态，提供统一地图选择、坐标网格、机器人 Agent、环境修改、重置和测试用例执行。
+
+在项目目录启动可视自由测试：
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\demo.py --mode free
+```
+
+窗口默认加载家居地图；左上角可选择地图并点击“加载地图”。家居使用移动操作技能，`classic` 和 `alternate` 使用原机械臂技能；自然语言均通过现有模型接口、计划契约和逐步守卫执行。右上角从同一用例目录选择测试并观察过程。
+
+环境修改 Agent 可调整桌面方块/区域，或家居物品初始位置、地图名称及非可信描述；有效修改保存到所选地图。家居风险状态和操作权限不能由描述解除。重置重新读取最新保存的初态；自由指令持续作用于当前仿真，需要重新开始时使用重置或测试用例入口。
+
+默认使用 `.env` 中配置的 DeepSeek 模型。没有 API 配置时，可用离线模式启动自由测试：
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\demo.py --mode free --planner stub --environment-planner rules
+```
+
+`stub` 和 `rules` 是有限的离线开发解析器，不代表真实模型能力。桌面地图的危险区目标返回 `UNSAFE_TARGET`；家居按当前物品权限、状态和有限停靠点检查目标。相对坐标指令中的“x/y 轴调高一点”默认增加0.01米。
+
+专用自动化批量评测显式关闭窗口：
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\demo.py --mode batch --headless --planner llm --environment-planner llm
+```
+
+可选 `--viewer` 在批量运行时显示场景；例如离线可视化批量测试：
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\demo.py --mode batch --viewer --planner stub --environment-planner rules
+```
+
+常用参数包括 `--map <地图ID>`、`--cases <JSON文件>`、可重复的 `--case <用例ID>`、`--output <新报告目录>` 和 `--records-dir <主记录根>`。运行报告默认在 `results/demo/<时间戳>/`，真实任务事件与工件默认在 `PROJECT_ROOT/records`，指定 `--output` 不改变主记录根。批量环境编辑使用本次运行的地图副本。自由模式要求 Tk/OpenGL，不能使用 `--headless`。
+
+完整 UI 操作、环境编辑指令、用例格式、批量隔离及后续阶段接入方法见[通用 Demo 使用说明](DEMO.md)。复现自然语言和环境编辑用例可运行 `configs/demo_language_cases.json`。
+
+MuJoCo 机器人操作 Agent 项目。问题定义、选型理由与工作原理见 [技术方案文档](TECHNICAL_DESIGN.md)，当前模块安排见 [MODULES.md](MODULES.md)，M0/M1/M2/M3 的历史执行结论及限制见 [NOTES.md](NOTES.md)。
 
 ## MuJoCo / M1
 
@@ -40,27 +96,29 @@ Panda 上游文件及 Apache-2.0 许可证位于 `assets/third_party/franka_emik
 
 种子清单和阈值在 `configs/m2_scenarios.json`、`configs/m2_thresholds.json`。脚本不会覆盖已有证据；指定新输出目录，或明确添加 `--overwrite`。每个运行目录包含 episode JSONL、50 ms 采样轨迹 CSV 和由原始记录生成的汇总 JSON。
 
-M2 逐个物理步计算 Panda 所有碰撞几何及方块到危险区几何的最近距离；任何对象进入 20 mm 安全边距都会以 `DANGER_ZONE_VIOLATION` 失败，并记录部件、阶段、步数和距离。新增危险区门槛的正式清单与完整复跑均为 10/10，分别见 `results/m2/acceptance_danger_zone_body_pair/` 和 `results/m2/acceptance_danger_zone_body_pair_repeat/`。已知限制是低位抓取时 Panda `link4` 与桌面在仿真中最深接触 `5.986 mm`；仅此接触对使用 `6.5 mm` 诊断上限，其余碰撞对仍限制在 `5 mm`。这项结果不代表真实 Panda 的安全间隙或硬件能力。分步计划、阈值依据和失败记录见 [`M2_实施计划.md`](M2_实施计划.md) 与 [`NOTES.md`](NOTES.md)。
+M2 逐个物理步计算 Panda 所有碰撞几何及方块到危险区几何的最近距离；任何对象进入 20 mm 安全边距都会以 `DANGER_ZONE_VIOLATION` 失败，并记录部件、阶段、步数和距离。新增危险区门槛的正式清单与完整复跑均为 10/10，分别见 `results/m2/acceptance_danger_zone_body_pair/` 和 `results/m2/acceptance_danger_zone_body_pair_repeat/`。已知限制是低位抓取时 Panda `link4` 与桌面在仿真中最深接触 `5.986 mm`；仅此接触对使用 `6.5 mm` 诊断上限，其余碰撞对仍限制在 `5 mm`。这项结果不代表真实 Panda 的安全间隙或硬件能力。阈值依据和历史失败记录见 [NOTES.md](NOTES.md)。
 
-## M3 Agent 闭环
+## 通用指令 Agent 闭环
 
-M3 入口把有限范围内的自然语言目标解析为方块和 A/B 目标，再请求 DeepSeek 生成严格 JSON 技能计划。默认运行单条任务时打开实时 MuJoCo Viewer，窗口绑定正在执行的同一组 `MjModel`/`MjData`；单次演示命令：
-
-```powershell
-.\.venv\Scripts\python.exe .\scripts\m3_agent.py --instruction "Move the cube to the green target area."
-.\.venv\Scripts\python.exe .\scripts\m3_agent.py --instruction "Place the cube in the blue target area."
-```
-
-只允许一次 `pick(cube, top)` 和一次 `place(target)`；模型输出在动作前经过 schema、目标、前置条件和扩张危险区路径检查。M2 按物理步运行的危险区、接触穿透、末端误差及仿真状态检查继续生效。每次技能后重读真实状态，最终由独立判定器确认目标区、释放、桌面支撑和稳定时间。
-
-冻结的 20 条语言验收案例可批量运行；批量模式默认无界面，运行目录必须全新且不会覆盖既有证据：
+所有机器人自然语言入口统一使用 `InstructionAgent`。LLM 先解释原始指令的目标、方法和来源，再查询实际观测与当前能力，提出动作段；执行监督器审核并执行真实动作、独立验收，必要时将实际失败与进展交给同一个 Agent 重新规划。桌面 Panda 与家居 Stretch 使用不同物理适配器。单次任务默认显示执行中的同一组 `MjModel`/`MjData`：
 
 ```powershell
-.\.venv\Scripts\python.exe .\scripts\m3_agent.py --batch --planner llm --output .\results\m3\my_llm_run
-.\.venv\Scripts\python.exe .\scripts\m3_agent.py --batch --planner stub --output .\results\m3\my_stub_run
+.\.venv\Scripts\python.exe .\scripts\instruction_agent.py --instruction "Move the cube to the green target area."
+.\.venv\Scripts\python.exe .\scripts\demo.py --mode free --planner llm --environment-planner llm
 ```
 
-每次运行写 `manifest.json`、追加式 `events.jsonl` 和 `episodes.jsonl`、按 50 ms 采样的 `trajectory.csv` 及 `summary.json`。`--planner stub` 用于开发/回归，不能作为实际 LLM 结果。M3 自身冻结了 low reasoning、disabled thinking 与 256 输出 token 上限；它独立于 DeepSeek smoke 脚本读取的 `.env` 推理设置。其余预算、提示词版本和 20 条输入见 `configs/m3_runtime.json` 与 `configs/m3_cases.json`；详细边界及验收门槛见 [`M3_实施计划.md`](M3_实施计划.md)。
+不再要求固定两步模板。动作仍受实际机器人能力、当前前置条件、路径和每步安全检查约束，最终由独立判定器检查接触、释放、支撑和连续稳定时间。
+
+原二十个 Panda 语言/场景用例只保留输入数据，全部通过通用 Agent 执行；批量也默认可视化，自动化评测显式添加 `--headless`。输出目录必须全新：
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\instruction_agent.py --batch --planner llm --output .\results\instruction\my_llm_run
+.\.venv\Scripts\python.exe .\scripts\instruction_agent.py --batch --headless --planner stub --output .\results\instruction\my_stub_run
+```
+
+每个任务保存到 `records/tasks/<上海开始日期>/<task_uuid>/`，以 manifest、追加事件和内容地址工件为事实源，终态 seal 校验封存；`task.json` 与索引可重建。默认根固定为 `PROJECT_ROOT/records`，只有 `--records-dir` 改变主根；`results` 只保存报告和引用。模型原始输出、实际动作和用户可信目标分别留证，`SUCCESS` 不自动成为奖励或正确示范。旧 v1 Agent 记录及 `evaluation/task_records.py` 已移除，无兼容模块。查询、独立评价和六种导出见 [TASK_RECORDS.md](TASK_RECORDS.md)。
+
+配置为 [configs/agent_runtime.json](configs/agent_runtime.json)：每次输出4096 tokens、每个工具对话8轮/24次调用、最多2次提案修正；整个任务共用24次模型请求、131072 tokens、128次动作、4次恢复和300秒。`stub`/`rules` 仅用于离线回归，LLM失败不会回退到规则模式。旧 Agent、旧 M3 执行器、`m3` 注册、`--legacy-m3` 和旧启动脚本已删除。
 
 ### 危险区违规分支示例
 
@@ -118,9 +176,11 @@ notepad .\.env
 
 ## 当前进度
 
+- 路线图第4、5步（A2/A3）已完成：独立家居地图、状态/关系风险与Stretch真实导航/抓取/携物/释放；3搬运+4拒绝+1碰撞故障验收8/8符合预期。完整测试94项，92通过、2项旧交互测试条件跳过；原生Viewer房间、搬运与故障另已实测。[使用说明](HOME_ROBOT.md)、[执行分析](../task-records/20261004-194446-home-mobile-robot/analysis.md)。
+
 - DeepSeek Chat Completions API 已完成单次连通性验证。
 - M0 基线已建立，本地提交为 `9991c06`。
 - M1 G0/G1/G1b 已通过：三处目标的末端跟踪最大停留误差为 0.19 mm；夹爪空载开合、桌面方块静置和项目场景截图均已记录。
 - M2 确定性抓取与放置已完成：冻结清单 10/10 通过，完整复跑 10/10，结果逐条一致；已知 link4/桌面接触例外见上文和 `NOTES.md`。
-- M3 受约束 Agent 闭环已完成：stub 20/20、真实 DeepSeek 预登记指令 20/20；默认 Viewer 的 A/B 单次任务均通过独立终态判定。Viewer 进程生命周期已验证，但本次锁屏环境未能独立核对窗口画面；细节见 [M3 实施计划](M3_实施计划.md)。
+- M3 受约束 Agent 闭环已完成：stub 20/20、真实 DeepSeek 预登记指令 20/20；默认 Viewer 的 A/B 单次任务均通过独立终态判定。Viewer 进程生命周期已验证，但当时的锁屏环境未能独立核对窗口画面；历史细节见 [NOTES.md](NOTES.md)。
 - M3 使用有限指令和结构化仿真真值，不代表任意语言理解、视觉感知、自动恢复、真实机器人或 Sim2Real 能力。M4 失败检测标定和 M5 恢复尚未验证。

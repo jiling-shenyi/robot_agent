@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "map_id": "alternate",
+  "name": "变体桌面",
+  "description": "方块从另一已验证的起点出发，危险区沿桌面右侧略微移动；保留两个目标区以复用 M3 与后续阶段测试。",
+  "revision": 1,
+  "cube_position_m": [0.42, -0.25, 0.425],
+  "danger_zone": {"position_m": [0.83, 0.28, 0.535], "half_size_m": [0.055, 0.06, 0.135]},
+  "targets": {
+    "target_a": {"position_m": [0.58, -0.12, 0.401], "half_size_m": [0.075, 0.075, 0.001]},
+    "target_b": {"position_m": [0.58, 0.12, 0.401], "half_size_m": [0.075, 0.075, 0.001]}
+  }
+}

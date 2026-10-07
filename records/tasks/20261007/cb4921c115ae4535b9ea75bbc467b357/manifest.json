@@ -1,0 +1,52 @@
+{
+  "behavior_bundle_id": "64aee989e6be0a0e75f992f424f9b5d99ae74724881f574125b4d13c9c228c5b",
+  "created_at": "2026-10-07T18:32:00.357319+08:00",
+  "date": "20261007",
+  "identities": {
+    "agent_role": "environment",
+    "agent_run_id": "agent_cf7817d86f424944be90b334508413b9",
+    "run_id": "environment_ac707afa401546aaaa75c8d5558152df",
+    "session_id": "session_43c1609c7a684d8f8ff26e37d2b9f90a",
+    "task_id": "cb4921c115ae4535b9ea75bbc467b357"
+  },
+  "initial_state_ref": {
+    "media_type": "application/json",
+    "path": "artifacts/sha256/92/9267760f17b8eb017a9bf7782460ff39b2851bd078560e689af08163d5e68af1.json",
+    "sha256": "9267760f17b8eb017a9bf7782460ff39b2851bd078560e689af08163d5e68af1",
+    "size_bytes": 3966
+  },
+  "kind": "agent_task",
+  "map": {
+    "alias": "hlr",
+    "definition_ref": {
+      "media_type": "application/json",
+      "path": "artifacts/sha256/92/9267760f17b8eb017a9bf7782460ff39b2851bd078560e689af08163d5e68af1.json",
+      "sha256": "9267760f17b8eb017a9bf7782460ff39b2851bd078560e689af08163d5e68af1",
+      "size_bytes": 3966
+    },
+    "id": "home_living_room"
+  },
+  "metadata_ref": {
+    "media_type": "application/json",
+    "path": "artifacts/sha256/4b/4bcbe432c48710953e891df32aad6a7c2c611920090d2ea13afd704a3482f432.json",
+    "sha256": "4bcbe432c48710953e891df32aad6a7c2c611920090d2ea13afd704a3482f432",
+    "size_bytes": 998
+  },
+  "natural_language_ref": {
+    "media_type": "application/json",
+    "path": "artifacts/sha256/b8/b8e2fa08590a0b2fb109b4baf317be6e1d15bab8c7782d3b2599a5d6c1d5388d.json",
+    "sha256": "b8e2fa08590a0b2fb109b4baf317be6e1d15bab8c7782d3b2599a5d6c1d5388d",
+    "size_bytes": 58
+  },
+  "schema_version": 2,
+  "sequence": 5,
+  "task_id": "cb4921c115ae4535b9ea75bbc467b357",
+  "task_kind": "map_edit",
+  "trusted_task_spec_ref": null,
+  "versions_ref": {
+    "media_type": "application/json",
+    "path": "artifacts/sha256/64/64aee989e6be0a0e75f992f424f9b5d99ae74724881f574125b4d13c9c228c5b.json",
+    "sha256": "64aee989e6be0a0e75f992f424f9b5d99ae74724881f574125b4d13c9c228c5b",
+    "size_bytes": 6275
+  }
+}

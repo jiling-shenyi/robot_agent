@@ -2,3 +2,9 @@
 assets/third_party/franka_emika_panda/panda.xml -text
 assets/third_party/franka_emika_panda/LICENSE -text
 assets/third_party/franka_emika_panda/assets/** -text
+
+# Preserve the Stretch upstream snapshot and its provenance hashes.
+assets/third_party/hello_robot_stretch/** -text
+
+# Manifest/journal/seal and content-addressed artifacts bind exact bytes.
+records/** -text

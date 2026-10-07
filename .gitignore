@@ -13,4 +13,9 @@ __pycache__/
 # Local temporary outputs. M1 evidence under results/m1 is versioned.
 results/cache/
 results/tmp/
+# Tk PhotoImage scratch frames only; retain PNG/JSON evidence outside tmp.
+results/tmp/*.ppm
 *.log
+
+# New live task records; curated evidence belongs in task-records or datasets.
+records/tasks/
