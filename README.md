@@ -1,5 +1,7 @@
 # Robot Agent
 
+当前 Agent 的整体架构图、已实现功能、待补能力与 LangChain/LangGraph 替代边界见 [Agent 架构与功能分析](AGENT_ARCHITECTURE_ANALYSIS.md)。
+
 下一阶段 LangChain 实践的接入架构、分阶段改造、依赖验证、机器人验收和回退安排见 [LangChain 技术方案](LANGCHAIN_TECHNICAL_PLAN.md)；该文档是实施设计，新增后端与参数尚未实现。
 
 已按路线图 A0 整理现有模块，并删除 src 中的旧兼容文件；代码直接使用拆分后的模块路径。脚本启动命令、模块职责、依赖方向及运行产物规则见[模块说明](MODULES.md)。
